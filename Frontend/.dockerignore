@@ -1,0 +1,14 @@
+# Exclude files that don't belong in the frontend Docker image
+node_modules/
+.next/
+out/
+coverage/
+*.log
+.env
+.env.*
+*.md
+.git/
+.gitignore
+
+# Monorepo mobile app (sibling dir; harmless if absent under this context)
+Flutter/

@@ -1,0 +1,115 @@
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  LOCAL DEVELOPMENT ONLY — Docker Compose Watch (hot reload)
+# ══════════════════════════════════════════════════════════════════════════════
+#
+#  Usage:
+#    docker compose -f docker-compose.dev.yml up --watch
+#    docker compose -f docker-compose.dev.yml up --watch --build   # first time
+#    docker compose -f docker-compose.dev.yml down
+#
+#  How it works:
+#  • `sync`    — Docker detects saved files on the host and copies them into
+#                the running container's filesystem. The container's own watcher
+#                (tsx watch / next dev) sees native Linux inotify events and
+#                reacts instantly — no polling needed.
+#  • `rebuild` — If package.json changes, the image is automatically rebuilt
+#                and the container restarted.
+#
+#  This file is NEVER used by the CI/CD pipeline (deploy.yml uses
+#  docker-compose.yml + production Dockerfiles only).
+# ══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile.dev
+    restart: "no"
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_INTERNAL_PORT}"
+    environment:
+      NODE_ENV:             ${NODE_ENV}
+      PORT:                 ${BACKEND_INTERNAL_PORT}
+      DB_HOST:              ${DB_HOST}
+      DB_PORT:              ${DB_PORT}
+      DB_USER:              ${DB_USER}
+      DB_PASSWORD:          ${DB_PASSWORD}
+      DB_NAME:              ${DB_NAME}
+      REDIS_URL:            ${REDIS_URL}
+      JWT_ACCESS_SECRET:    ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET:   ${JWT_REFRESH_SECRET}
+      FRONTEND_URL:         ${FRONTEND_URL}
+      SMTP_HOST:            ${SMTP_HOST}
+      SMTP_PORT:            ${SMTP_PORT}
+      SMTP_USER:            ${SMTP_USER}
+      SMTP_PASSWORD:        ${SMTP_PASSWORD}
+      EMAIL_FROM:           ${EMAIL_FROM}
+      OCI_NAMESPACE:        ${OCI_NAMESPACE}
+      OCI_BUCKET:           ${OCI_BUCKET}
+      OCI_REGION:           ${OCI_REGION}
+      GEMINI_API_KEY:       ${GEMINI_API_KEY}
+      GEMINI_MODEL:         ${GEMINI_MODEL}
+      GEMINI_EMBEDDING_MODEL: ${GEMINI_EMBEDDING_MODEL}
+      RAG_SERVICE_URL:      ${RAG_SERVICE_URL:-}
+      # Same reason as frontend: sync doesn't trigger inotify on Docker Desktop.
+      CHOKIDAR_USEPOLLING:  "true"
+      CHOKIDAR_INTERVAL:    "300"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${BACKEND_INTERNAL_PORT}/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    develop:
+      watch:
+        # Sync source changes into the container instantly (tsx watch reacts via inotify)
+        - action: sync
+          path: ./Backend/src
+          target: /app/src
+        # Rebuild the image if dependencies change
+        - action: rebuild
+          path: ./Backend/package.json
+    networks:
+      - app
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile.dev
+    restart: "no"
+    ports:
+      # next dev serves on port 3000 directly — no nginx in dev
+      - "${FRONTEND_PORT}:3000"
+    environment:
+      NODE_ENV:                  ${NODE_ENV}
+      # Used by next.config.ts rewrites to proxy /api/* → backend in dev
+      BACKEND_URL:               http://backend:5000
+      NEXT_TELEMETRY_DISABLED:   "1"
+      # Docker Desktop (Windows) does not fire inotify events when sync writes
+      # files into the container. Polling lets Next.js detect synced changes.
+      WATCHPACK_POLLING:         "true"
+    depends_on:
+      backend:
+        condition: service_healthy
+    develop:
+      watch:
+        # Sync all frontend source changes (app/, components/, lib/, etc.)
+        - action: sync
+          path: ./Frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+        # Rebuild the image if dependencies change
+        - action: rebuild
+          path: ./Frontend/package.json
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge

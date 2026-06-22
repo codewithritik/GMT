@@ -1,0 +1,104 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  deployments: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy on Server
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: https://gms.kasunc.uk
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy source files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          source: ".,!Frontend/node_modules,!Frontend/.next,!Backend/node_modules,!Backend/dist,!.git"
+          target: "~/Hosted/gms"
+          timeout: 5m
+          strip_components: 1
+          overwrite: true
+
+      - name: Build and Deploy on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          command_timeout: 20m
+          script: |
+            cd ~/Hosted/gms
+
+            # Stop and remove old containers and orphans
+            docker compose down --remove-orphans || true
+
+            # Drop dangling BuildKit cache (cheap; reduces stale snapshot refs without nuking all layers).
+            docker builder prune -f 2>/dev/null || true
+
+            # Build and start — exit immediately on failure so the step turns red
+            if ! docker compose up --build -d --remove-orphans; then
+              echo "⚠️ First build failed (often BuildKit snapshot corruption). Pruning and rebuilding frontend without cache..."
+              docker buildx prune -af 2>/dev/null || docker builder prune -af 2>/dev/null || true
+              if ! docker compose build --no-cache frontend; then
+                echo "❌ Frontend no-cache rebuild failed. Container logs:"
+                docker compose logs --tail 50
+                exit 1
+              fi
+              if ! docker compose up --build -d --remove-orphans; then
+                echo "❌ docker compose up failed after frontend rebuild. Container logs:"
+                docker compose logs --tail 50
+                exit 1
+              fi
+            fi
+
+            # Remove dangling images (best-effort, never fail the deploy over this)
+            docker image prune -f || true
+
+            echo "✅ Containers started successfully."
+
+      - name: Health check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script_stop: true
+          script: |
+            cd ~/Hosted/gms
+            echo "Waiting for backend to respond..."
+            # Wait up to 50 seconds (10 attempts * 5 seconds)
+            for i in $(seq 1 10); do
+              if curl -sf http://localhost:3004/health > /dev/null 2>&1; then
+                echo "Backend is healthy!"
+                
+                # If backend is healthy, make sure frontend is up
+                if curl -sf http://localhost:3003 > /dev/null 2>&1; then
+                  echo "Frontend is reachable!"
+                  docker compose ps
+                  exit 0
+                fi
+              fi
+              echo "Attempt $i/10: waiting..."
+              sleep 5
+            done
+            echo "Health check failed. Container logs:"
+            docker compose logs --tail 30
+            exit 1
