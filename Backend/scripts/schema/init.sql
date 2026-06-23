@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `lifecycle_id`     VARCHAR(36)   NOT NULL,
 
   `full_name`        VARCHAR(100)  NOT NULL,
-  `email`            VARCHAR(255)  NOT NULL,
+  `email`            VARCHAR(255)  DEFAULT NULL,
   `phone`            VARCHAR(20)   DEFAULT NULL,
   `dob`              DATE          DEFAULT NULL,
   `gender`           ENUM('male','female','other') DEFAULT NULL,
@@ -87,7 +87,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   `is_key_holder`    TINYINT(1)    NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_email`         (`email`),
   UNIQUE KEY `uq_user_lifecycle` (`lifecycle_id`),
   UNIQUE KEY `uq_employee_code_users` (`employee_code`),
   INDEX `idx_role`              (`role`),
@@ -114,6 +113,7 @@ CREATE TABLE IF NOT EXISTS `members` (
   `emergency_relation`      VARCHAR(50)  DEFAULT NULL,
   `is_onboarded`            TINYINT(1)   NOT NULL DEFAULT 0,
   `onboarded_at`            TIMESTAMP    NULL DEFAULT NULL,
+  `subscription_plan_id`    VARCHAR(36)  DEFAULT NULL,
 
   `id_document_type`        ENUM('nic','driving_license','passport') DEFAULT NULL,
   `id_nic_front`            VARCHAR(500) DEFAULT NULL,
@@ -132,7 +132,8 @@ CREATE TABLE IF NOT EXISTS `members` (
   UNIQUE KEY `uq_member_code` (`member_code`),
   CONSTRAINT `fk_members_user`      FOREIGN KEY (`user_id`)       REFERENCES `users`(`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_members_lifecycle` FOREIGN KEY (`lifecycle_id`)  REFERENCES `entity_lifecycle`(`id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_members_trainer` FOREIGN KEY (`assigned_trainer`) REFERENCES `users`(`id`) ON DELETE SET NULL
+  CONSTRAINT `fk_members_trainer` FOREIGN KEY (`assigned_trainer`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_members_plan` FOREIGN KEY (`subscription_plan_id`) REFERENCES `subscription_plans`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================

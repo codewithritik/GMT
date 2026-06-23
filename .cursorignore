@@ -1,0 +1,82 @@
+# --- Frontend Specific ---
+Frontend/node_modules/
+Frontend/build/
+Frontend/dist/
+Frontend/.next/
+Frontend/.nuxt/
+Frontend/out/
+
+# --- Backend Specific ---
+Backend/node_modules/
+Backend/dist/
+Backend/build/
+Backend/out/
+Backend/.env
+Backend/logs/
+
+# --- Global / Tooling ---
+.git/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+
+# --- Media & Design Assets ---
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.gif
+*.mp4
+*.ico
+
+# --- Database & Cache ---
+*.db
+*.sqlite
+.eslintcache
+
+# --- docker 
+docker-compose.yml
+docker-compose.dev.yml
+docker-compose.prod.yml
+docker-compose.test.yml
+docker-compose.yml
+docker-compose.dev.yml
+docker-compose.prod.yml
+docker-compose.test.yml
+
+# --- .env files ---
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.development.local
+.env.production.local
+.env.test.local
+.env.development.env
+.env.production.env
+.env.test.env
+.env.development.local
+.env.production.local
+.env.test.local
+.env.development.env
+.env.production.env
+.env.test.env
+.env.development.local
+.env.production.local
+.env.test.local
+
+
+
+-- readme files
+*.md
+*.txt
+*.pdf
+*.docx
+*.doc
+*.xls
+*.xlsx
+*.pptx
+*.ppt

@@ -369,6 +369,13 @@ export const createUser = asyncHandler(async (req: AuthRequest, res: Response) =
   ));
 });
 
+export const uploadUserAvatar = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const file = req.file as Express.Multer.File | undefined;
+  if (!file?.buffer) throw errors.badRequest('Image file is required');
+  await opsService.uploadUserAvatar(req.params.id, file.buffer, file.mimetype);
+  res.json(response.success(null, 'Avatar uploaded'));
+});
+
 export const listAuditLogs = asyncHandler(async (req: AuthRequest, res: Response) => {
   const raw = Number(req.query.limit);
   const limit = Number.isFinite(raw) && raw > 0 ? Math.min(Math.round(raw), 2000) : 500;

@@ -1,8 +1,23 @@
-import { Router } from 'express';
+import { Router, Request } from 'express';
+import multer, { FileFilterCallback } from 'multer';
 import { authenticate, authorize, optionalAuthenticate } from '../middleware/auth.js';
 import * as ops from '../controllers/ops.controller.js';
 
 const router = Router();
+
+const ALLOWED_IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
+    if (ALLOWED_IMAGE_MIMES.includes(file.mimetype as typeof ALLOWED_IMAGE_MIMES[number])) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG or WebP images are allowed (max 5MB)'));
+    }
+  },
+});
 
 // Public simulation endpoints (independent from auth/session)
 router.get('/simulate/public/bootstrap', ops.publicSimulationBootstrap);
@@ -135,6 +150,7 @@ router.get('/audit-logs', authorize('admin'), ops.listAuditLogs);
 
 router.get('/users', authorize('admin', 'manager'), ops.listUsers);
 router.post('/users', authorize('admin'), ops.createUser);
+router.post('/users/:id/avatar', authorize('admin', 'manager'), upload.single('file'), ops.uploadUserAvatar);
 router.patch('/users/:id', authorize('admin', 'manager'), ops.updateUser);
 router.get('/members', authorize('admin', 'manager', 'trainer'), ops.listMembers);
 

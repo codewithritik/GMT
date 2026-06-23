@@ -503,7 +503,6 @@ export const opsAPI = {
     fullName: string;
     email: string;
     role: 'admin' | 'manager' | 'trainer' | 'member';
-    password: string;
     phone?: string;
     dob?: string;
     gender?: 'male' | 'female' | 'other';
@@ -515,12 +514,23 @@ export const opsAPI = {
     medicalConditions?: string;
     allergies?: string;
     memberStatus?: 'active' | 'inactive' | 'suspended';
+    joinDate?: string;
+    assignedTrainerId?: string;
+    fitnessGoals?: string;
+    subscriptionPlanId?: string;
     hireDate?: string;
     designation?: string;
     specialization?: string;
     ptHourlyRate?: number;
     yearsExperience?: number;
   }) => apiClient.post('/ops/users', payload).then(r => r.data.data),
+  uploadUserAvatar: (userId: string, file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return apiClient.post(`/ops/users/${userId}/avatar`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
   updateUser: (id: string, payload: Partial<{ fullName: string; phone: string; isActive: boolean; role: 'admin' | 'manager' | 'trainer' | 'member'; memberStatus: 'active' | 'inactive' | 'suspended' }>) =>
     apiClient.patch(`/ops/users/${id}`, payload).then(r => r.data.data),
   members: () =>

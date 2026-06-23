@@ -386,7 +386,7 @@ async function settleSubscriptionPurchase(
   }
 
   const startDate = new Date();
-  const endDate = addDays(startDate, plan.durationDays);  
+  const endDate = addDays(startDate, plan.durationValue);  
   const subscriptionId = ids.uuid();
   const pricePaid = Math.max(0, Number(plan.price) - discountAmount);
   const subLid = await insertLifecycleRow();
@@ -2912,6 +2912,10 @@ export async function createUser(
     medicalConditions?: string;
     allergies?: string;
     memberStatus?: 'active' | 'inactive' | 'suspended';
+    joinDate?: string;
+    assignedTrainerId?: string;
+    fitnessGoals?: string;
+    subscriptionPlanId?: string;
     /** trainer */
     hireDate?: string;
     designation?: string;
@@ -2925,13 +2929,25 @@ export async function createUser(
     throw errors.badRequest('Only member or trainer accounts can be created from admin');
   }
 
-  const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, input.email)).limit(1);
-  if (existing) throw errors.conflict('Email is already in use');
+  
+  const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.phone, input.phone ?? '')).limit(1);
+  if (existing) throw errors.conflict('Phone number is already in use');
+
+  if (input.role === 'member' && input.assignedTrainerId) {
+    const [trainer] = await db
+      .select({ id: users.id })
+      .from(users)
+      .innerJoin(userLc, eq(users.lifecycleId, userLc.id))
+      .where(and(eq(users.id, input.assignedTrainerId), eq(users.role, 'trainer'), isNull(userLc.deletedAt)))
+      .limit(1);
+    if (!trainer) throw errors.badRequest('Assigned trainer not found');
+  }
 
   const id = ids.uuid();
   const memberCode = input.role === 'member' ? ids.memberCode() : null;
   const employeeCode = input.role === 'trainer' ? `EMP-${Date.now().toString().slice(-6)}` : null;
-  const passwordHash = await hashPassword(input.password);
+  const generatedPassword = crypto.randomUUID().slice(0, 8);
+  const passwordHash = await hashPassword(generatedPassword);
 
   await db.transaction(async (tx) => {
     const userLid = await insertLifecycleRow(tx);
@@ -2939,7 +2955,7 @@ export async function createUser(
       id,
       lifecycleId: userLid,
       fullName: input.fullName,
-      email: input.email.toLowerCase().trim(),
+      email: input.email?.toLowerCase().trim() || '',
       phone: input.phone ?? null,
       dob: input.dob ? safeDate(input.dob) : null,
       gender: input.gender ?? null,
@@ -2958,7 +2974,10 @@ export async function createUser(
         lifecycleId: memLid,
         memberCode: memberCode!,
         memberStatus: input.memberStatus ?? 'active',
-        joinDate: safeDate(dateOnlyIso(new Date())),
+        subscriptionPlanId: input.subscriptionPlanId ?? null,
+        joinDate: input.joinDate ? safeDate(input.joinDate) : safeDate(dateOnlyIso(new Date())),
+        assignedTrainerId: input.assignedTrainerId ?? null,
+        fitnessGoals: input.fitnessGoals ?? null,
         isOnboarded: false,
         emergencyName: input.emergencyName ?? null,
         emergencyPhone: input.emergencyPhone ?? null,
@@ -2985,6 +3004,13 @@ export async function createUser(
     }
   });
 
+  // if (input.role === 'member' && input.membershipPlanId) {
+  //   await settleSubscriptionPurchase(id, {
+  //     planId: input.membershipPlanId,
+  //     paymentMethod: 'cash',
+  //   });
+  // }
+
   const [row] = await db.select().from(users).where(eq(users.id, id));
   if (actor) {
     await audit.appendAudit({
@@ -2998,6 +3024,13 @@ export async function createUser(
     });
   }
   return row;
+}
+
+export async function uploadUserAvatar(userId: string, buffer: Buffer, mimetype: string) {
+  const [person] = await db.select({ id: users.id }).from(users).where(eq(users.id, userId)).limit(1);
+  if (!person) throw errors.notFound('User');
+  const { uploadProfileImage } = await import('./auth.service.js');
+  await uploadProfileImage(userId, 'avatar', buffer, mimetype);
 }
 
 export async function updateUser(

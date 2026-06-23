@@ -85,6 +85,7 @@ export const members = mysqlTable('members', {
   userId: varchar('user_id', { length: 36 }).primaryKey().references(() => users.id, { onDelete: 'cascade' }),
   lifecycleId: varchar('lifecycle_id', { length: 36 }).notNull().unique().references(() => entityLifecycle.id),
 
+  subscriptionPlanId: varchar('subscription_plan_id', { length: 36 }),
   bloodType: mysqlEnum('blood_type', ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']),
   medicalConditions: text('medical_conditions'),
   allergies: text('allergies'),
