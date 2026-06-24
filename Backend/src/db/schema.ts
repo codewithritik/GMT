@@ -91,6 +91,16 @@ export const members = mysqlTable('members', {
   allergies: text('allergies'),
   fitnessGoals: varchar('fitness_goals', { length: 500 }),
   experienceLevel: mysqlEnum('experience_level', ['beginner', 'intermediate', 'advanced']),
+  occupation: varchar('occupation', { length: 100 }),
+  maritalStatus: mysqlEnum('marital_status', ['single', 'married', 'divorced', 'widowed']),
+  address: varchar('address', { length: 255 }),
+  city: varchar('city', { length: 100 }),
+  state: varchar('state', { length: 100 }),
+  pincode: varchar('postal_code', { length: 20 }),
+  country: varchar('country', { length: 100 }),
+  referralSource: varchar('referral_source', { length: 100 }),
+  workoutTime: varchar('workout_time', { length: 100 }),
+  notes: text('notes'),
   emergencyName: varchar('emergency_name', { length: 100 }),
   emergencyPhone: varchar('emergency_phone', { length: 20 }),
   emergencyRelation: varchar('emergency_relation', { length: 50 }),
@@ -259,7 +269,7 @@ export const memberMetrics = mysqlTable('member_metrics', {
   lifecycleId: varchar('lifecycle_id', { length: 36 }).notNull().unique().references(() => entityLifecycle.id),
   personId: varchar('person_id', { length: 36 }).notNull(),
   recordedAt: timestamp('recorded_at'),
-  source: mysqlEnum('source', ['manual', 'trainer', 'device']).notNull(),
+  source: mysqlEnum('source', ['manual', 'trainer', 'device']).notNull().default('manual'),
   weightKg: decimal('weight_kg', { precision: 5, scale: 2 }),
   heightCm: decimal('height_cm', { precision: 5, scale: 2 }),
   bmi: decimal('bmi', { precision: 4, scale: 1 }),
@@ -428,6 +438,7 @@ export const usersRelations = relations(users, ({ one }) => ({
   member: one(members, { fields: [users.id], references: [members.userId] }),
   trainer: one(trainers, { fields: [users.id], references: [trainers.userId] }),
   lifecycle: one(entityLifecycle, { fields: [users.lifecycleId], references: [entityLifecycle.id] }),
+  memberMetrics: one(memberMetrics, { fields: [users.id], references: [memberMetrics.personId] }),
 }));
 
 export const membersRelations = relations(members, ({ one }) => ({

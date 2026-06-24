@@ -3,11 +3,12 @@
  * Authentication is handled entirely via httpOnly cookies set by the backend.
  * No tokens are stored or managed client-side.
  */
+import { MemberProfilePageProps, SingleMemberResponse } from '@/types/member';
 import axios, { type AxiosError } from 'axios';
 
 const apiClient = axios.create({
   baseURL: '/api',
-  timeout: 15_000,
+  timeout: 15_0000,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
@@ -499,6 +500,8 @@ export const opsAPI = {
     apiClient.get('/ops/trainers').then(r => r.data.data as Array<{ id: string; fullName: string }>),
   users: (role?: 'admin' | 'manager' | 'trainer' | 'member') =>
     apiClient.get('/ops/users', { params: role ? { role } : undefined }).then(r => r.data.data as any[]),
+  userById: (id: string) =>
+    apiClient.get(`/ops/users/${id}`).then(r => r.data.data as SingleMemberResponse),
   createUser: (payload: {
     fullName: string;
     email: string;
@@ -535,6 +538,8 @@ export const opsAPI = {
     apiClient.patch(`/ops/users/${id}`, payload).then(r => r.data.data),
   members: () =>
     apiClient.get('/ops/members').then(r => r.data.data as any[]),
+  membersById: (id: string) =>
+    apiClient.get(`/ops/members/${id}`).then(r => r.data.data as MemberProfilePageProps),
   closures: () =>
     apiClient.get('/ops/closures').then(r => r.data.data as any[]),
   createClosure: (payload: { closureDate: string; reason?: string; isEmergency?: boolean }) =>

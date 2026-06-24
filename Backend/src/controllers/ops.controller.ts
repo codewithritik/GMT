@@ -358,6 +358,13 @@ export const listUsers = asyncHandler(async (req: AuthRequest, res: Response) =>
   const role = req.query.role as Role | undefined;
   res.json(response.success(await opsService.listUsersByRole(role)));
 });
+
+export const getUserById = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const id = String(req.params.id ?? '').trim();
+  if (!id) throw errors.badRequest('id is required');
+  res.json(response.success(await opsService.getUserById(id)));
+});
+
 export const listTrainers = asyncHandler(async (_req: AuthRequest, res: Response) => {
   res.json(response.success(await opsService.listTrainers()));
 });
@@ -394,6 +401,12 @@ export const updateUser = asyncHandler(async (req: AuthRequest, res: Response) =
 
 export const listMembers = asyncHandler(async (_req: AuthRequest, res: Response) => {
   res.json(response.success(await opsService.listMembers()));
+});
+
+export const getMemberById = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const id = String(req.params.id ?? '').trim();
+  if (!id) throw errors.badRequest('id is required');
+  res.json(response.success(await opsService.getMemberById(id)));
 });
 
 export const listClosures = asyncHandler(async (_req: AuthRequest, res: Response) => {
@@ -625,4 +638,12 @@ export const getReportPdf = asyncHandler(async (req: AuthRequest, res: Response)
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
   res.send(buf);
+});
+
+
+export const updateMemberMetrics = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const user = requireUser(req);
+  const memberId = String(req.params.id ?? '').trim();
+  if (!memberId) throw errors.badRequest('memberId is required');
+  res.json(response.success(await opsService.updateMemberMetrics(memberId, req.body), 'Member metrics updated'));
 });

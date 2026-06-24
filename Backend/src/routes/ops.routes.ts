@@ -149,10 +149,15 @@ router.patch('/config', authorize('admin'), ops.updateConfig);
 router.get('/audit-logs', authorize('admin'), ops.listAuditLogs);
 
 router.get('/users', authorize('admin', 'manager'), ops.listUsers);
+router.get('/users/:id', authorize('admin', 'manager'), ops.getUserById);
 router.post('/users', authorize('admin'), ops.createUser);
 router.post('/users/:id/avatar', authorize('admin', 'manager'), upload.single('file'), ops.uploadUserAvatar);
 router.patch('/users/:id', authorize('admin', 'manager'), ops.updateUser);
 router.get('/members', authorize('admin', 'manager', 'trainer'), ops.listMembers);
+
+
+// memebers routes for full deatils 
+router.get('/members/:id', authorize('admin', 'manager'), ops.getMemberById);
 
 router.get('/closures', authorize('admin', 'manager'), ops.listClosures);
 router.post('/closures', authorize('admin', 'manager'), ops.createClosure);
@@ -165,5 +170,9 @@ router.post('/simulate/trainer-shift', authorize('admin', 'manager'), ops.simula
 router.post('/simulate/appointment', authorize('admin', 'manager', 'trainer'), ops.simulateAppointment);
 router.post('/simulate/vitals', authorize('admin', 'manager', 'trainer'), ops.simulateVitals);
 router.get('/simulate/state', authorize('admin', 'manager', 'trainer'), ops.getSimulationState);
+
+
+// update member metrics
+router.patch('/members/:id/metrics', authorize('admin', 'manager'), ops.updateMemberMetrics);
 
 export default router;

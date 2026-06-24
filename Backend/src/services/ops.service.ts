@@ -21,6 +21,7 @@ import {
   inventoryTransactions,
   branchClosures,
   shifts,
+  memberMetrics,
 } from '../db/schema.js';
 import {
   userLc,
@@ -63,6 +64,7 @@ import {
   workoutPreferencesToFocusSuffix,
   workoutPreferencesToPromptBlock,
 } from '../validators/aiWorkoutPlanPreferences.js';
+import { sanitizePatch } from '../utils/response.js';
 
 type Role = 'admin' | 'manager' | 'trainer' | 'member';
 
@@ -386,7 +388,7 @@ async function settleSubscriptionPurchase(
   }
 
   const startDate = new Date();
-  const endDate = addDays(startDate, plan.durationValue);  
+  const endDate = addDays(startDate, plan.durationValue);
   const subscriptionId = ids.uuid();
   const pricePaid = Math.max(0, Number(plan.price) - discountAmount);
   const subLid = await insertLifecycleRow();
@@ -2853,6 +2855,18 @@ export async function listUsersByRole(role?: Role) {
   }));
 }
 
+
+// user by id 
+
+
+export async function getUserById(id: string) {
+  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  if (!user) throw errors.notFound('User');
+  return user;
+}
+
+
+
 export async function listSimulationPeople(role: 'member' | 'trainer') {
   if (role === 'member') {
     return db
@@ -2929,7 +2943,7 @@ export async function createUser(
     throw errors.badRequest('Only member or trainer accounts can be created from admin');
   }
 
-  
+
   const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.phone, input.phone ?? '')).limit(1);
   if (existing) throw errors.conflict('Phone number is already in use');
 
@@ -3072,6 +3086,34 @@ export async function listMembers() {
     emergencyPhone: m.emergencyPhone,
     idVerificationStatus: m.idVerificationStatus,
   }));
+}
+
+export async function getMemberById(id: string) {
+  const result = await db.query.users.findFirst({
+    where: eq(users.id, id),
+    with: {
+      member: true
+    },
+  });
+  const memberMetricsData = await db.select().from(memberMetrics).where(eq(memberMetrics.personId, id)).orderBy(desc(memberMetrics.recordedAt));
+
+  if (!result) return null;
+
+  const { member, ...user } = result;
+  // removing sensitive data from user
+  const {
+    passwordHash,
+    qrSecret,
+    resetToken,
+    emailVerifyToken,
+    ...safeUser
+  } = user;
+
+  return {
+    user: safeUser ?? {},
+    member: member ?? {},
+    memberMetrics: memberMetricsData ?? {},
+  };
 }
 
 // ── Branch Closures ───────────────────────────────────────────────────────────
@@ -3317,4 +3359,102 @@ export async function getSimulationState() {
     visits: todayVisits,
     payments: todayPayments,
   };
+}
+
+function normalizeMemberPatch(raw: Record<string, any>): Record<string, any> {
+  const patch = { ...raw };
+  if (patch.postalCode !== undefined && patch.pincode === undefined) {
+    patch.pincode = patch.postalCode;
+    delete patch.postalCode;
+  }
+  return patch;
+}
+
+const MEMBER_METRICS_COLUMNS = new Set([
+  'weightKg',
+  'heightCm',
+  'bmi',
+  'restingHr',
+  'notes',
+  'source',
+  'recordedAt',
+]);
+
+function splitMemberMetricsPatch(raw: Record<string, any>) {
+  const memberExtras: Record<string, any> = {};
+  const metrics: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(raw)) {
+    if (key === 'workoutTime') {
+      memberExtras.workoutTime = value;
+    } else if (MEMBER_METRICS_COLUMNS.has(key)) {
+      metrics[key] = value;
+    }
+  }
+
+  return { memberExtras, metrics };
+}
+
+export async function updateMemberMetrics(
+  memberId: string,
+  input: {
+    user?: Record<string, any>;
+    member?: Record<string, any>;
+    memberMetrics?: Record<string, any>;
+  }
+) {
+  const userPatch = sanitizePatch(input.user ?? {});
+  const { memberExtras, metrics: rawMetrics } = splitMemberMetricsPatch(input.memberMetrics ?? {});
+  const memberPatch = sanitizePatch({
+    ...normalizeMemberPatch(input.member ?? {}),
+    ...memberExtras,
+  });
+  const metricsPatch = sanitizePatch(rawMetrics);
+
+  const memberRow = await db.query.members.findFirst({
+    where: eq(members.userId, memberId),
+  });
+
+  if (!memberRow) throw errors.notFound("Member");
+
+  return await db.transaction(async (tx) => {
+    const result = {
+      user: false,
+      member: false,
+      memberMetrics: false,
+    };
+
+    if (Object.keys(userPatch).length > 0) {
+      await tx
+        .update(users)
+        .set(userPatch)
+        .where(eq(users.id, memberId));
+
+      result.user = true;
+    }
+
+    if (Object.keys(memberPatch).length > 0) {
+     await tx
+        .update(members)
+        .set(memberPatch)
+        .where(eq(members.userId, memberId));
+      // console.log("cr updated member", cr);
+      result.member = true;
+    }
+
+    if (Object.keys(metricsPatch).length > 0) {
+      const metricsLifecycleId = await insertLifecycleRow(tx);
+
+      await tx.insert(memberMetrics).values({
+        id: crypto.randomUUID(),
+        lifecycleId: metricsLifecycleId,
+        personId: memberId,
+        ...metricsPatch,
+      });
+
+      result.memberMetrics = true;
+    }
+
+    return result;
+  });
 }

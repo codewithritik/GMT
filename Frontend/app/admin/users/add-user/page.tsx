@@ -110,9 +110,9 @@ export default function AdminUsersNewPage() {
                 joinDate: data.dateOfJoining || undefined,
                 assignedTrainerId: data.assignedTrainerId || undefined,
                 subscriptionPlanId: data.subscriptionPlanId || undefined
-              
+
             });
-            
+
             console.log('this is created', created);
 
             if (avatarFile && created?.id) {
@@ -120,7 +120,12 @@ export default function AdminUsersNewPage() {
             }
 
             toast.success('User Added', `${data.name} has been added successfully`);
-            router.push('/admin/users');
+            // Redirect to the newly created member's profile page
+            if (created?.id) {
+                router.push(`/admin/users/${created.id}`);
+            } else {
+                router.push('/admin/users');
+            }
         } catch (err) {
             toast.error('Error', getErrorMessage(err));
         }
@@ -146,7 +151,7 @@ export default function AdminUsersNewPage() {
             />
 
             <Card className="w-full">
-            <form onSubmit={handleSubmit(onSubmit, (invalid) => console.log('validation failed', invalid))} className="space-y-2">
+                <form onSubmit={handleSubmit(onSubmit, (invalid) => console.log('validation failed', invalid))} className="space-y-2">
 
                     {/* Account section is shown first so Role selector is at top */}
                     {/* <AccountSection

@@ -99,6 +99,43 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- 4. MEMBERS (1:1 member user)
 -- ============================================================================
 
+-- CREATE TABLE IF NOT EXISTS `members` (
+--   `user_id`                 VARCHAR(36)  NOT NULL,
+--   `lifecycle_id`            VARCHAR(36)  NOT NULL,
+
+--   `blood_type`              ENUM('A+','A-','B+','B-','AB+','AB-','O+','O-') DEFAULT NULL,
+--   `medical_conditions`      TEXT         DEFAULT NULL,
+--   `allergies`               TEXT         DEFAULT NULL,
+--   `fitness_goals`           VARCHAR(500) DEFAULT NULL,
+--   `experience_level`        ENUM('beginner','intermediate','advanced') DEFAULT NULL,
+--   `emergency_name`          VARCHAR(100) DEFAULT NULL,
+--   `emergency_phone`         VARCHAR(20)  DEFAULT NULL,
+--   `emergency_relation`      VARCHAR(50)  DEFAULT NULL,
+--   `is_onboarded`            TINYINT(1)   NOT NULL DEFAULT 0,
+--   `onboarded_at`            TIMESTAMP    NULL DEFAULT NULL,
+--   `subscription_plan_id`    VARCHAR(36)  DEFAULT NULL,
+
+--   `id_document_type`        ENUM('nic','driving_license','passport') DEFAULT NULL,
+--   `id_nic_front`            VARCHAR(500) DEFAULT NULL,
+--   `id_nic_back`             VARCHAR(500) DEFAULT NULL,
+--   `id_verification_status`  ENUM('pending','approved','rejected') DEFAULT NULL,
+--   `id_verification_note`    TEXT         DEFAULT NULL,
+--   `id_submitted_at`         TIMESTAMP    NULL DEFAULT NULL,
+
+--   `member_code`             VARCHAR(20)  DEFAULT NULL,
+--   `join_date`               DATE         DEFAULT NULL,
+--   `member_status`           ENUM('active','inactive','suspended') DEFAULT NULL,
+--   `assigned_trainer`        VARCHAR(36)  DEFAULT NULL,
+
+--   PRIMARY KEY (`user_id`),
+--   UNIQUE KEY `uq_member_lifecycle` (`lifecycle_id`),
+--   UNIQUE KEY `uq_member_code` (`member_code`),
+--   CONSTRAINT `fk_members_user`      FOREIGN KEY (`user_id`)       REFERENCES `users`(`id`) ON DELETE CASCADE,
+--   CONSTRAINT `fk_members_lifecycle` FOREIGN KEY (`lifecycle_id`)  REFERENCES `entity_lifecycle`(`id`) ON DELETE RESTRICT,
+--   CONSTRAINT `fk_members_trainer` FOREIGN KEY (`assigned_trainer`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+--   CONSTRAINT `fk_members_plan` FOREIGN KEY (`subscription_plan_id`) REFERENCES `subscription_plans`(`id`) ON DELETE SET NULL
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `members` (
   `user_id`                 VARCHAR(36)  NOT NULL,
   `lifecycle_id`            VARCHAR(36)  NOT NULL,
@@ -108,9 +145,24 @@ CREATE TABLE IF NOT EXISTS `members` (
   `allergies`               TEXT         DEFAULT NULL,
   `fitness_goals`           VARCHAR(500) DEFAULT NULL,
   `experience_level`        ENUM('beginner','intermediate','advanced') DEFAULT NULL,
+
+  /* NEW COLUMNS */
+  `occupation`              VARCHAR(100) DEFAULT NULL,
+  `marital_status`          ENUM('single','married','divorced','widowed') DEFAULT NULL,
+
+  `address`                 VARCHAR(255) DEFAULT NULL,
+  `city`                    VARCHAR(100) DEFAULT NULL,
+  `state`                   VARCHAR(100) DEFAULT NULL,
+  `postal_code`             VARCHAR(20)  DEFAULT NULL,
+  `country`                 VARCHAR(100) DEFAULT NULL,
+
+  `referral_source`         VARCHAR(100) DEFAULT NULL,
+
   `emergency_name`          VARCHAR(100) DEFAULT NULL,
   `emergency_phone`         VARCHAR(20)  DEFAULT NULL,
   `emergency_relation`      VARCHAR(50)  DEFAULT NULL,
+
+  `fitness_goals`           VARCHAR(500) DEFAULT NULL,
   `is_onboarded`            TINYINT(1)   NOT NULL DEFAULT 0,
   `onboarded_at`            TIMESTAMP    NULL DEFAULT NULL,
   `subscription_plan_id`    VARCHAR(36)  DEFAULT NULL,
@@ -126,15 +178,38 @@ CREATE TABLE IF NOT EXISTS `members` (
   `join_date`               DATE         DEFAULT NULL,
   `member_status`           ENUM('active','inactive','suspended') DEFAULT NULL,
   `assigned_trainer`        VARCHAR(36)  DEFAULT NULL,
-
+  `workout_time`            VARCHAR(100) DEFAULT NULL,
+  `notes`                   TEXT         DEFAULT NULL,
+  
   PRIMARY KEY (`user_id`),
+
   UNIQUE KEY `uq_member_lifecycle` (`lifecycle_id`),
   UNIQUE KEY `uq_member_code` (`member_code`),
-  CONSTRAINT `fk_members_user`      FOREIGN KEY (`user_id`)       REFERENCES `users`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_members_lifecycle` FOREIGN KEY (`lifecycle_id`)  REFERENCES `entity_lifecycle`(`id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_members_trainer` FOREIGN KEY (`assigned_trainer`) REFERENCES `users`(`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_members_plan` FOREIGN KEY (`subscription_plan_id`) REFERENCES `subscription_plans`(`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+  CONSTRAINT `fk_members_user`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `users`(`id`)
+    ON DELETE CASCADE,
+
+  CONSTRAINT `fk_members_lifecycle`
+    FOREIGN KEY (`lifecycle_id`)
+    REFERENCES `entity_lifecycle`(`id`)
+    ON DELETE RESTRICT,
+
+  CONSTRAINT `fk_members_trainer`
+    FOREIGN KEY (`assigned_trainer`)
+    REFERENCES `users`(`id`)
+    ON DELETE SET NULL,
+
+  CONSTRAINT `fk_members_plan`
+    FOREIGN KEY (`subscription_plan_id`)
+    REFERENCES `subscription_plans`(`id`)
+    ON DELETE SET NULL
+
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
+
 
 -- ============================================================================
 -- 5. TRAINERS (1:1 trainer user)
