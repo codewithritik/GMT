@@ -2,22 +2,34 @@
 
 import { useState } from "react";
 import OverviewTab from "./tabs/overview";
+import HealthTab from "./tabs/health";
 import MemberTabs from "./Membertabs";
 import { MemberProfilePageProps } from "@/types/member";
+import EmergencyTab from "./tabs/emergency";
+import DocumentsTab from "./tabs/documentsTab";
+import { Card } from "@/components/ui/SharedComponents";
 
-export default function MemberProfileTabs({ data }: { data: MemberProfilePageProps }) {
+export default function MemberProfileTabs({
+  data,
+  memberId,
+}: {
+  data: MemberProfilePageProps;
+  memberId: string;
+}) {
   const [activeTab, setActiveTab] = useState("Overview");
 
   const renderTab = () => {
     switch (activeTab) {
       case "Overview":
         return <OverviewTab data={data} />;
-      // Add other tab components here as you build them:
-      // case "Health": return <HealthTab />;
-      // case "Emergency Contact": return <EmergencyContactTab />;
+      case "Health":
+        return <HealthTab data={data} />;
+      case "Emergency Contact":
+        return <EmergencyTab data={data} />;
       // case "Progress Tracking": return <ProgressTrackingTab />;
       // case "Notes": return <NotesTab />;
-      // case "Documents": return <DocumentsTab />;
+      case "Documents":
+        return <DocumentsTab memberId={memberId} />;
       default:
         return (
           <p className="text-gray-500 text-sm py-4">
@@ -28,12 +40,12 @@ export default function MemberProfileTabs({ data }: { data: MemberProfilePagePro
   };
 
   return (
-    <div className="rounded-xl border border-[#2a3044] bg-[#13161f] overflow-hidden">
+    <Card className="rounded-xl border border-[#2a3044] overflow-hidden">
       {/* Tab bar */}
       <MemberTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Tab content */}
       <div className="p-6">{renderTab()}</div>
-    </div>
+    </Card>
   );
 }

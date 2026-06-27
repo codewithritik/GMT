@@ -31,7 +31,9 @@ const BASE_COOKIE: CookieOptions = {
   path: '/',
 };
 
-const ACCESS_COOKIE: CookieOptions = { ...BASE_COOKIE, maxAge: 15 * 60 * 1000 };          // 15 min
+
+// TODO: make the maxAge dynamic based on the plan
+const ACCESS_COOKIE: CookieOptions = { ...BASE_COOKIE, maxAge:  7 * 24 * 60 * 1000 };          // 15 min
 const REFRESH_COOKIE: CookieOptions = { ...BASE_COOKIE, maxAge: 7 * 24 * 60 * 60 * 1000 }; // 7 days
 const CLEAR_COOKIE: CookieOptions = { ...BASE_COOKIE, maxAge: 0 };
 
@@ -220,8 +222,8 @@ export const completeOnboarding = asyncHandler(async (req: AuthRequest, res: Res
 
   // Auto-generate an AI workout plan in the background — non-blocking, failures are silent
   import('../services/ops.service.js').then(ops =>
-    ops.generateAiWorkoutPlan(req.user!.id, req.user!.id, 'member').catch(() => {/* silent */})
-  ).catch(() => {/* silent */});
+    ops.generateAiWorkoutPlan(req.user!.id, req.user!.id, 'member').catch(() => {/* silent */ })
+  ).catch(() => {/* silent */ });
 
   res.json(response.success(null, 'Onboarding complete'));
 });
@@ -243,9 +245,10 @@ export const uploadIdDocuments = asyncHandler(async (req: AuthRequest, res: Resp
   if (!isPassport && !backFile) {
     throw errors.badRequest('Back document image is required for National ID and Driving License');
   }
+  const userId = req.params.memberId || req.user!.id;
 
   await authService.uploadIdDocuments(
-    req.user!.id,
+    userId,
     documentType as authService.IdDocumentType,
     frontFile.buffer,
     frontFile.mimetype,
@@ -279,7 +282,7 @@ export const downloadIdDocument = asyncHandler(async (req: AuthRequest, res: Res
   res.setHeader('Content-Type', contentType);
   res.setHeader('Content-Disposition', `inline; filename="nic_${type}_${userId}.jpg"`);
   res.setHeader('Cache-Control', 'private, max-age=300');
-  
+
   // Stream directly — handle errors to prevent unhandled rejections
   const stream = body as NodeJS.ReadableStream;
   stream.on('error', (err) => {

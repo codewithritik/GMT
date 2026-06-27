@@ -174,5 +174,6 @@ router.get('/simulate/state', authorize('admin', 'manager', 'trainer'), ops.getS
 
 // update member metrics
 router.patch('/members/:id/metrics', authorize('admin', 'manager'), ops.updateMemberMetrics);
+router.patch('/members/:id/subscription-plan', authorize('admin', 'manager'), ops.updateMemberSubscriptionPlan);
 
 export default router;

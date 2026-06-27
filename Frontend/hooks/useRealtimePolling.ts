@@ -1,12 +1,15 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 /**
  * Lightweight realtime fallback via polling.
  * Keeps dashboards fresh until websocket/SSE transport is added.
  */
-export function useRealtimePolling(fn: () => void | Promise<void>, intervalMs = 15000) {
+export function useRealtimePolling(
+  fn: () => void | Promise<void>,
+  intervalMs = 15000,
+) {
   const fnRef = useRef(fn);
   const inFlightRef = useRef(false);
 
@@ -36,4 +39,3 @@ export function useRealtimePolling(fn: () => void | Promise<void>, intervalMs = 
     };
   }, [intervalMs]);
 }
-

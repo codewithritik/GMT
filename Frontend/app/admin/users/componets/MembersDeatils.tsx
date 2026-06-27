@@ -1,22 +1,32 @@
 import { Input, Select, Textarea } from "@/components/ui/SharedComponents";
 import { FieldGrid, Half, SectionDivider } from "./userFromDeatisl";
-import { BLOOD_GROUP_OPTIONS, FITNESS_GOAL_OPTIONS, GENDER_OPTIONS } from "./contsValues";
+import {
+  BLOOD_GROUP_OPTIONS,
+  FITNESS_GOAL_OPTIONS,
+  GENDER_OPTIONS,
+} from "./contsValues";
 import { Errors, Reg } from "./schema";
 import { ROLE_OPTIONS as ROLE_OPTIONS_VALUES } from "@/lib/consts";
 
 interface MemberDetailsSectionProps {
-    register: (name: any) => Reg;
-    errors: Errors;
-    planOptions: { value: string; label: string }[];
-    trainerOptions?: { value: string; label: string }[];
-    role: keyof typeof ROLE_OPTIONS_VALUES;
+  register: (name: any) => Reg;
+  errors: Errors;
+  planOptions: { value: string; label: string }[];
+  trainerOptions?: { value: string; label: string }[];
+  role: keyof typeof ROLE_OPTIONS_VALUES;
 }
 
-export function MemberDetailsSection({ register, errors, planOptions, trainerOptions = [], role }: MemberDetailsSectionProps) {
-    return (
-        <>
-            {/* Personal */}
-            {/* <FieldGrid>
+export function MemberDetailsSection({
+  register,
+  errors,
+  planOptions,
+  trainerOptions = [],
+  role,
+}: MemberDetailsSectionProps) {
+  return (
+    <>
+      {/* Personal */}
+      {/* <FieldGrid>
                 <Half>
                     <Input
                         label="Address"
@@ -27,45 +37,47 @@ export function MemberDetailsSection({ register, errors, planOptions, trainerOpt
                 </Half>
             </FieldGrid> */}
 
+      {role === ROLE_OPTIONS_VALUES.member && (
+        <>
+          {/* Membership */}
+          <SectionDivider title="Membership" />
+          <FieldGrid>
+            <Half>
+              <Select
+                label="Membership Plan"
+                options={planOptions}
+                placeholder={
+                  planOptions.length ? "Select a plan" : "No plans available"
+                }
+                {...register("subscriptionPlanId")}
+                error={errors.subscriptionPlanId?.message}
+              />
+            </Half>
+            <div>
+              <Input
+                label="Date of Joining"
+                type="date"
+                {...register("dateOfJoining")}
+                error={errors.dateOfJoining?.message}
+              />
+            </div>
+            <div>
+              <Select
+                label="Assigned Trainer"
+                options={trainerOptions}
+                placeholder={
+                  trainerOptions.length
+                    ? "Select a trainer"
+                    : "No trainers available"
+                }
+                {...register("assignedTrainerId")}
+                error={errors.assignedTrainerId?.message}
+              />
+            </div>
+          </FieldGrid>
 
-
-            {role === ROLE_OPTIONS_VALUES.member && (
-                <>
-                    {/* Membership */}
-                    < SectionDivider title="Membership" />
-                    <FieldGrid>
-                        <Half>
-                            <Select
-                                label="Membership Plan"
-                                options={planOptions}
-                                placeholder={planOptions.length ? 'Select a plan' : 'No plans available'}
-                                {...register('subscriptionPlanId')}
-                                error={errors.subscriptionPlanId?.message}
-
-                            />
-                        </Half>
-                        <div>
-                            <Input
-                                label="Date of Joining"
-                                type="date"
-                                {...register('dateOfJoining')}
-                                error={errors.dateOfJoining?.message}
-
-                            />
-                        </div>
-                        <div>
-                            <Select
-                                label="Assigned Trainer"
-                                options={trainerOptions}
-                                placeholder={trainerOptions.length ? 'Select a trainer' : 'No trainers available'}
-                                {...register('assignedTrainerId')}
-                                error={errors.assignedTrainerId?.message}
-                            />
-                        </div>
-                    </FieldGrid>
-
-                    {/* Health */}
-                    {/* <SectionDivider title="Health Information" />
+          {/* Health */}
+          {/* <SectionDivider title="Health Information" />
                     <FieldGrid>
                         <div>
                             <Select
@@ -92,11 +104,11 @@ export function MemberDetailsSection({ register, errors, planOptions, trainerOpt
                             />
                         </Half>
                     </FieldGrid> */}
-                </>
-            )}
+        </>
+      )}
 
-            {/* Emergency Contact */}
-            {/* <SectionDivider title="Emergency Contact" />
+      {/* Emergency Contact */}
+      {/* <SectionDivider title="Emergency Contact" />
             <FieldGrid>
                 <Half>
                     <Input
@@ -121,6 +133,6 @@ export function MemberDetailsSection({ register, errors, planOptions, trainerOpt
                     />
                 </div>
             </FieldGrid> */}
-        </>
-    );
+    </>
+  );
 }

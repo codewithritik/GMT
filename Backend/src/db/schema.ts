@@ -273,7 +273,10 @@ export const memberMetrics = mysqlTable('member_metrics', {
   weightKg: decimal('weight_kg', { precision: 5, scale: 2 }),
   heightCm: decimal('height_cm', { precision: 5, scale: 2 }),
   bmi: decimal('bmi', { precision: 4, scale: 1 }),
+  bodyFatPct: decimal('body_fat_pct', { precision: 5, scale: 2 }),
+  muscleMassKg: decimal('muscle_mass_kg', { precision: 5, scale: 2 }),
   restingHr: tinyint('resting_hr'),
+  targetWeightKg: decimal('target_weight_kg', { precision: 5, scale: 2 }),
   notes: text('notes'),
 });
 

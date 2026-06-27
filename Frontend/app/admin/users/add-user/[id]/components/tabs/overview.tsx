@@ -28,8 +28,18 @@ import { OverviewFormData, overviewSchema } from "../schema";
 import z from "zod";
 import { MemberProfilePageProps } from "@/types/member";
 import apiClient from "@/lib/api";
-import { MemberProfileFormValues, memberProfileSchema } from "@/types/schema";
-import { BLOOD_GROUPS, FITNESS_GOALS, MARITAL_STATUSES, REFERRAL_SOURCES, WORKOUT_TIMES } from "@/lib/consts";
+import {
+  MemberProfileFormValues,
+  memberProfileSchema,
+  MemberMetricsFormValues,
+} from "@/types/schema";
+import {
+  BLOOD_GROUPS,
+  FITNESS_GOALS,
+  MARITAL_STATUSES,
+  REFERRAL_SOURCES,
+  WORKOUT_TIMES,
+} from "@/lib/consts";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -67,23 +77,48 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function toFormValues(
-  data: MemberProfilePageProps
-): MemberProfileFormValues {
+function normalizeMemberMetrics(
+  raw: MemberProfilePageProps["memberMetrics"],
+): MemberMetricsFormValues {
+  const record = Array.isArray(raw) ? raw[0] : raw;
+  if (!record) return {};
+
+  const toNum = (v: number | string | null | undefined) =>
+    v == null || v === "" ? null : Number(v);
+
   return {
-    user: {...data.user},
-    member: {...data.member},
-    memberMetrics: {...data.memberMetrics},
+    weightKg: toNum(record.weightKg),
+    heightCm: toNum(record.heightCm),
+    bmi: toNum(record.bmi),
+    bodyFatPct: toNum(record.bodyFatPct),
+    muscleMassKg: toNum(record.muscleMassKg),
+    restingHr: record.restingHr ?? null,
+    targetWeightKg: toNum(record.targetWeightKg),
+    notes: record.notes ?? null,
+    source: record.source,
+  };
+}
+
+function toFormValues(data: MemberProfilePageProps): MemberProfileFormValues {
+  return {
+    user: { ...data.user },
+    member: { ...data.member },
+    memberMetrics: normalizeMemberMetrics(data.memberMetrics),
   };
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-
-export default function OverviewTab({ data }: { data: MemberProfilePageProps }) {
+export default function OverviewTab({
+  data,
+}: {
+  data: MemberProfilePageProps;
+}) {
   const { member, memberMetrics, user } = data;
   const [isEditing, setIsEditing] = useState(false);
-  const [savedData, setSavedData] = useState<MemberProfileFormValues>(toFormValues(data));
+  const [savedData, setSavedData] = useState<MemberProfileFormValues>(
+    toFormValues(data),
+  );
 
   const {
     register,
@@ -93,7 +128,7 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
     formState: { errors, isDirty },
   } = useForm<MemberProfileFormValues>({
     resolver: zodResolver(memberProfileSchema),
-    defaultValues: data,
+    defaultValues: toFormValues(data),
   });
 
   const onSubmit = (formData: MemberProfileFormValues) => {
@@ -132,8 +167,8 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
           <p className="text-red-400 text-xs select-none">Editing mode</p>
         )}
 
-         <div className="flex gap-2">
-          {!isEditing &&
+        <div className="flex gap-2">
+          {!isEditing && (
             <Button
               type="button"
               variant="outline"
@@ -142,49 +177,26 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                 reset(savedData);
                 setIsEditing(true);
               }}
-              className="border-[#2a3044] text-gray-400 hover:text-white hover:bg-[#2a3044] gap-1.5"
-            >
+              className="border-[#2a3044] text-gray-400 hover:text-white hover:bg-[#2a3044] gap-1.5">
               <Pencil className="h-3.5 w-3.5" />
               Edit
             </Button>
-          }
-        </div> 
-      
-        
+          )}
+        </div>
       </div>
 
       <form
-        onSubmit={handleSubmit(onSubmit, (invalid) => console.log('validation failed', invalid))}
+        onSubmit={handleSubmit(onSubmit, (invalid) =>
+          console.log("validation failed", invalid),
+        )}
         onDoubleClick={(e) => e.stopPropagation()}
-        className="space-y-8"
-      >
+        className="space-y-8">
         {/* ── Personal Details ── */}
         <section>
           <SectionTitle>Personal Details</SectionTitle>
 
           {/* Row 1 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-            {/* Date of Birth */}
-            {/* <div className="space-y-1.5">
-              <Label className="text-gray-400 text-sm flex items-center gap-1.5">
-                <CalendarDays className="h-3.5 w-3.5" />
-                Date of Birth
-              </Label>
-              {isEditing ? (
-                <>
-                  <Input
-                    {...register("dob", { required: "Required" })}
-                    placeholder="DD-MM-YYYY"
-                    className={inputCls}
-                  />
-                  {errors.dob && (
-                    <p className="text-red-400 text-xs">{errors.dob.message}</p>
-                  )}
-                </>
-              ) : (
-                <ReadValue value={savedData.dob} />
-              )}
-            </div> */}
 
             {/* Occupation */}
             <div className="space-y-1.5">
@@ -200,8 +212,6 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
               )}
             </div>
 
-
-
             {/* Blood Group */}
             <div className="space-y-1.5">
               <Label className="text-gray-400 text-sm">Blood Group</Label>
@@ -211,13 +221,18 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                   control={control}
                   rules={{ required: "Required" }}
                   render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}>
                       <SelectTrigger className={selectTriggerCls}>
                         <SelectValue placeholder="Select Blood Group" />
                       </SelectTrigger>
                       <SelectContent className={selectContentCls}>
                         {BLOOD_GROUPS.map((bg) => (
-                          <SelectItem key={bg} value={bg} className={selectItemCls}>
+                          <SelectItem
+                            key={bg}
+                            value={bg}
+                            className={selectItemCls}>
                             {bg}
                           </SelectItem>
                         ))}
@@ -252,13 +267,18 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                   name="member.maritalStatus"
                   control={control}
                   render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}>
                       <SelectTrigger className={selectTriggerCls}>
                         <SelectValue placeholder="Select Marital Status" />
                       </SelectTrigger>
                       <SelectContent className={selectContentCls}>
                         {MARITAL_STATUSES.map((s) => (
-                          <SelectItem key={s} value={s} className={selectItemCls}>
+                          <SelectItem
+                            key={s}
+                            value={s}
+                            className={selectItemCls}>
                             {s}
                           </SelectItem>
                         ))}
@@ -358,7 +378,9 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                   name="member.fitnessGoals"
                   control={control}
                   render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}>
                       <SelectTrigger className={selectTriggerCls}>
                         <span className="flex items-center gap-2">
                           <Target className="h-4 w-4 text-red-500 shrink-0" />
@@ -367,7 +389,10 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                       </SelectTrigger>
                       <SelectContent className={selectContentCls}>
                         {FITNESS_GOALS.map((g) => (
-                          <SelectItem key={g} value={g} className={selectItemCls}>
+                          <SelectItem
+                            key={g}
+                            value={g}
+                            className={selectItemCls}>
                             {g}
                           </SelectItem>
                         ))}
@@ -393,7 +418,9 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                   name="member.workoutTime"
                   control={control}
                   render={({ field }) => (
-                    <Select value={field.value ?? "" as string} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value ?? ("" as string)}
+                      onValueChange={field.onChange}>
                       <SelectTrigger className={selectTriggerCls}>
                         <span className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-gray-400 shrink-0" />
@@ -402,7 +429,10 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                       </SelectTrigger>
                       <SelectContent className={selectContentCls}>
                         {WORKOUT_TIMES.map((t) => (
-                          <SelectItem key={t} value={t} className={selectItemCls}>
+                          <SelectItem
+                            key={t}
+                            value={t}
+                            className={selectItemCls}>
                             {t}
                           </SelectItem>
                         ))}
@@ -428,7 +458,9 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                   name="member.referralSource"
                   control={control}
                   render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}>
                       <SelectTrigger className={selectTriggerCls}>
                         <span className="flex items-center gap-2">
                           <Users className="h-4 w-4 text-gray-400 shrink-0" />
@@ -437,7 +469,10 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                       </SelectTrigger>
                       <SelectContent className={selectContentCls}>
                         {REFERRAL_SOURCES.map((r) => (
-                          <SelectItem key={r} value={r} className={selectItemCls}>
+                          <SelectItem
+                            key={r}
+                            value={r}
+                            className={selectItemCls}>
                             {r}
                           </SelectItem>
                         ))}
@@ -459,7 +494,7 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
             <Label className="text-gray-400 text-sm">Additional Notes</Label>
             {isEditing ? (
               <Textarea
-                {...register("member.notes")}  
+                {...register("member.notes")}
                 rows={3}
                 className={`${inputCls} resize-y`}
                 placeholder="Any notes about the member..."
@@ -471,16 +506,12 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
             )}
           </div>
 
-          
-
           {/* Save button — only visible in edit mode */}
           {isEditing && (
             <div className="flex gap-3">
               <Button
                 type="submit"
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 gap-2"
-
-              >
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 gap-2">
                 <Save className="h-4 w-4" />
                 Save Changes
               </Button>
@@ -488,8 +519,7 @@ export default function OverviewTab({ data }: { data: MemberProfilePageProps }) 
                 type="button"
                 variant="outline"
                 onClick={handleCancel}
-                className="border-[#2a3044] text-gray-400 hover:text-white hover:bg-[#2a3044]"
-              >
+                className="border-[#2a3044] text-gray-400 hover:text-white hover:bg-[#2a3044]">
                 Cancel
               </Button>
             </div>

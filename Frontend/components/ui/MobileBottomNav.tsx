@@ -30,13 +30,13 @@ export function MobileBottomNav() {
         return "/member/profile";
     }
   })();
-  const isProfileActive = pathname === profileHref || pathname.startsWith(profileHref + "/");
+  const isProfileActive =
+    pathname === profileHref || pathname.startsWith(profileHref + "/");
 
   return (
     <nav
       className="md:hidden fixed inset-x-0 bottom-0 z-[45] border-t border-zinc-800/80 bg-[#1e1e1e]/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom,0px)]"
-      aria-label="Primary"
-    >
+      aria-label="Primary">
       <div className="mx-auto flex max-w-7xl items-stretch justify-around gap-1 px-2 pt-1">
         {primary.map(({ label, href, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
@@ -47,10 +47,15 @@ export function MobileBottomNav() {
               className={cn(
                 "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg py-2 text-[10px] font-medium sm:text-xs",
                 isActive ? "text-red-400" : "text-zinc-400 active:text-white",
-              )}
-            >
-              <Icon size={22} strokeWidth={isActive ? 2.25 : 2} className={cn("shrink-0", isActive && "text-red-400")} />
-              <span className="px-0.5 text-center leading-tight break-words whitespace-normal">{label}</span>
+              )}>
+              <Icon
+                size={22}
+                strokeWidth={isActive ? 2.25 : 2}
+                className={cn("shrink-0", isActive && "text-red-400")}
+              />
+              <span className="px-0.5 text-center leading-tight break-words whitespace-normal">
+                {label}
+              </span>
             </Link>
           );
         })}
@@ -58,16 +63,19 @@ export function MobileBottomNav() {
           href={profileHref}
           className={cn(
             "flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg py-2 text-[10px] font-medium sm:text-xs",
-            isProfileActive ? "text-red-400" : "text-zinc-400 active:text-white",
+            isProfileActive
+              ? "text-red-400"
+              : "text-zinc-400 active:text-white",
           )}
-          aria-label="Open profile"
-        >
+          aria-label="Open profile">
           <User
             size={22}
             strokeWidth={isProfileActive ? 2.25 : 2}
             className={cn("shrink-0", isProfileActive && "text-red-400")}
           />
-          <span className="px-0.5 text-center leading-tight break-words whitespace-normal">Profile</span>
+          <span className="px-0.5 text-center leading-tight break-words whitespace-normal">
+            Profile
+          </span>
         </Link>
       </div>
     </nav>

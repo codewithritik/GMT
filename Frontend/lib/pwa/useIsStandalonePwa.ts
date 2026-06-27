@@ -8,7 +8,9 @@ import { useEffect, useState } from "react";
  */
 export function useIsStandalonePwa() {
   // `undefined` until we have a chance to evaluate the standalone display mode.
-  const [isStandalone, setIsStandalone] = useState<boolean | undefined>(undefined);
+  const [isStandalone, setIsStandalone] = useState<boolean | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     const mql = window.matchMedia?.("(display-mode: standalone)");
@@ -41,4 +43,3 @@ export function useIsStandalonePwa() {
 
   return isStandalone;
 }
-

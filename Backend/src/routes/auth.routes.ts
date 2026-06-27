@@ -56,6 +56,8 @@ router.post('/change-password',   authenticate, requireVerified, validate(change
 router.post('/logout', auth.logout);
 router.post('/onboarding',        authenticate, validate(onboardingSchema),                                   auth.completeOnboarding);
 router.post('/upload-id',         authenticate, upload.fields([{ name: 'nic_front', maxCount: 1 }, { name: 'nic_back', maxCount: 1 }]), auth.uploadIdDocuments);
+router.post('/upload-id/:memberId',         authenticate, upload.fields([{ name: 'nic_front', maxCount: 1 }, { name: 'nic_back', maxCount: 1 }]), auth.uploadIdDocuments);
+
 
 // ── Admin only ───────────────────────────────────────────────────────────────
 router.get( '/admin/id-submissions',        authenticate, authorize('admin'),                                   auth.getIdSubmissions);

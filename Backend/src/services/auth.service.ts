@@ -57,8 +57,9 @@ interface TokenPayload {
   emailVerified: boolean;
 }
 
+// TODO: make the expiresIn dynamic based on the plan
 async function generateTokens(payload: TokenPayload): Promise<TokenPair> {
-  const accessToken = jwt.sign(payload, env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+  const accessToken = jwt.sign(payload, env.JWT_ACCESS_SECRET, { expiresIn: '7d' });
   const jti = nanoid(32);
   const refreshToken = jwt.sign(
     { sub: payload.sub, jti, type: 'refresh' },

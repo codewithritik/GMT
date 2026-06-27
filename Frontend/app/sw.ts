@@ -19,14 +19,19 @@ const serwist = new Serwist({
     // Important: Cloudflare/edge can return a "successful" HTML response with status 5xx.
     // Treat 5xx navigations as failures so the document fallback (/~offline) is used.
     {
-      matcher: ({ request, sameOrigin }) => sameOrigin && request.destination === "document",
+      matcher: ({ request, sameOrigin }) =>
+        sameOrigin && request.destination === "document",
       // Strict requirement: when offline, ALWAYS show offline page (never cached HTML).
       handler: new NetworkOnly({
         plugins: [
           {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             async fetchDidSucceed({ response }: any) {
-              if (response && typeof response.status === "number" && response.status >= 500) {
+              if (
+                response &&
+                typeof response.status === "number" &&
+                response.status >= 500
+              ) {
                 throw new Error(`navigation ${response.status}`);
               }
               return response;
@@ -48,7 +53,8 @@ const serwist = new Serwist({
       }),
     },
     {
-      matcher: ({ sameOrigin, url: { pathname } }) => sameOrigin && pathname.startsWith("/api/"),
+      matcher: ({ sameOrigin, url: { pathname } }) =>
+        sameOrigin && pathname.startsWith("/api/"),
       handler: new NetworkOnly(),
     },
     ...defaultCache,

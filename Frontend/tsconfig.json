@@ -20,8 +20,7 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    }
-    ,
+    },
     "types": ["node", "react", "react-dom", "@serwist/next/typings"]
   },
   "include": [

@@ -39,8 +39,7 @@ export function Sidebar() {
                 isActive
                   ? "bg-red-600/15 text-red-400 shadow-sm"
                   : "text-zinc-400 hover:text-white hover:bg-zinc-800/50",
-              )}
-            >
+              )}>
               <Icon size={18} className={isActive ? "text-red-400" : ""} />
               <span className="min-w-0 break-words">{label}</span>
             </Link>
@@ -63,8 +62,7 @@ export function Sidebar() {
           />
           <div
             className="absolute left-0 bottom-0 w-[80vw] max-w-72 bg-[#252526] border-r border-zinc-800/50 shadow-2xl"
-            style={{ top: NAVBAR_HEIGHT }}
-          >
+            style={{ top: NAVBAR_HEIGHT }}>
             <SidebarContent />
           </div>
         </div>
@@ -73,8 +71,7 @@ export function Sidebar() {
       {/* Desktop Sidebar — starts below navbar and can grow with page height */}
       <aside
         className="hidden md:flex flex-col w-56 bg-[#252526] border-r border-zinc-800/50 shrink-0 sticky self-start h-[calc(100vh-96px)] overflow-hidden"
-        style={{ top: NAVBAR_HEIGHT }}
-      >
+        style={{ top: NAVBAR_HEIGHT }}>
         <SidebarContent />
       </aside>
     </>

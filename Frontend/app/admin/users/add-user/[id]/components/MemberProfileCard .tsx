@@ -9,36 +9,46 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Card } from "@/components/ui/SharedComponents";
 import { DATE_FORMAT } from "@/lib/consts";
 import { MemberProfilePageProps, SingleMemberResponse } from "@/types/member";
 import dayjs from "dayjs";
-import { Camera, Pencil, MoreVertical, User, Droplets, CalendarDays } from "lucide-react";
+import {
+  Camera,
+  Pencil,
+  MoreVertical,
+  User,
+  Droplets,
+  CalendarDays,
+} from "lucide-react";
 import { useState } from "react";
 
-// const member = {
-//   name: "John Doe",
-//   status: "Active",
-//   memberId: "MEM000123",
-//   phone: "+91 98765 43210",
-//   email: "john.doe@example.com",
-//   gender: "Male",
-//   bloodGroup: "B+",
-//   dob: "28 Jan 1995",
-//   age: 29,
-//   avatarUrl: "/avatar-placeholder.jpg",
-// };
+const statusVariant = {
+  active: "default",
+  inactive: "outline",
+  suspended: "destructive",
+} as const;
 
-export default function MemberProfileCard({ data }: { data: MemberProfilePageProps }) {
+
+
+export default function MemberProfileCard({
+  data,
+}: {
+  data: MemberProfilePageProps;
+}) {
   const { member, memberMetrics, user } = data;
-    const age = (dayjs().diff(dayjs(user.dob), 'year').toString());
+  const age = dayjs().diff(dayjs(user.dob), "year").toString();
 
   return (
-    <div className=" px-6 py-5 bg-zinc-800/60 border border-zinc-700 rounded-2xl p-6 w-full">
+    <Card className=" px-6 py-5 border border-[#2a3044] rounded-2xl p-6 w-full">
       <div className="flex items-start gap-5">
         {/* Avatar with camera icon */}
         <div className="relative shrink-0">
           <Avatar className="h-40 w-40 rounded-xl border-2 border-[#2a3044]">
-            <AvatarImage src={user.avatarKey || "/avatar-placeholder.jpg"} alt={user.fullName} />
+            <AvatarImage
+              src={user.avatarKey || "/avatar-placeholder.jpg"}
+              alt={user.fullName}
+            />
             <AvatarFallback className="bg-[#2a3044] text-white text-xl rounded-xl">
               {user.fullName
                 .split(" ")
@@ -61,14 +71,15 @@ export default function MemberProfileCard({ data }: { data: MemberProfilePagePro
             <h2 className="text-white text-xl font-semibold tracking-tight">
               {user.fullName}
             </h2>
-            <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-medium px-2 py-0.5 rounded-md">
-              {member.memberStatus}
+            <Badge variant={statusVariant[member.memberStatus]}>
+              {member.memberStatus.charAt(0).toUpperCase() + member.memberStatus.slice(1)}
             </Badge>
+
           </div>
 
           {/* data ID */}
           <p className="text-gray-400 text-sm mb-1">
-            data Code: {member.memberCode}
+            Member Code: {member.memberCode}
           </p>
 
           {/* Phone + Email */}
@@ -86,7 +97,8 @@ export default function MemberProfileCard({ data }: { data: MemberProfilePagePro
             <MetaPill icon={<Droplets className="h-3.5 w-3.5 text-rose-400" />}>
               {member.bloodType}
             </MetaPill>
-            <MetaPill icon={<CalendarDays className="h-3.5 w-3.5 text-purple-400" />}>
+            <MetaPill
+              icon={<CalendarDays className="h-3.5 w-3.5 text-purple-400" />}>
               {dayjs(user.dob).format(DATE_FORMAT)}{" "}
               <span className="text-gray-500">({age} yrs)</span>
             </MetaPill>
@@ -131,7 +143,7 @@ export default function MemberProfileCard({ data }: { data: MemberProfilePagePro
           </DropdownMenu>
         </div> */}
       </div>
-    </div>
+    </Card>
   );
 }
 

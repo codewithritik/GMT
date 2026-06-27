@@ -1,8 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
-import { authAPI } from '../lib/api';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
+import axios from "axios";
+import { authAPI } from "../lib/api";
 
 function isStandalonePwaRuntime(): boolean {
   try {
@@ -14,7 +21,7 @@ function isStandalonePwaRuntime(): boolean {
   }
 }
 
-export type Role = 'admin' | 'manager' | 'trainer' | 'member';
+export type Role = "admin" | "manager" | "trainer" | "member";
 
 export interface User {
   id: string;
@@ -54,10 +61,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function dashboardPathForRole(role: string): string {
   switch (role) {
-    case 'trainer': return '/trainer/dashboard';
-    case 'manager': return '/manager/dashboard';
-    case 'admin':   return '/admin/dashboard';
-    default:        return '/member/dashboard';
+    case "trainer":
+      return "/trainer/dashboard";
+    case "manager":
+      return "/manager/dashboard";
+    case "admin":
+      return "/admin/dashboard";
+    default:
+      return "/member/dashboard";
   }
 }
 
@@ -87,11 +98,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCoverMediaVersion((v) => v + 1);
   }, []);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchProfileDeduped = useCallback(async (): Promise<User | null> => {
     if (profileRequestRef.current) return profileRequestRef.current;
-    const req = authAPI.getProfile()
+    const req = authAPI
+      .getProfile()
       .then((res) => {
         const d = res.data.data;
         const freshUser: User = {
@@ -107,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
         setUser(freshUser);
         setIsAuthenticated(true);
-        localStorage.setItem('user', JSON.stringify(freshUser));
+        localStorage.setItem("user", JSON.stringify(freshUser));
         return freshUser;
       })
       .catch((err) => {
@@ -115,16 +129,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // (Including 429 — do not show a “logged in” UI from stale localStorage alone.)
         setUser(null);
         setIsAuthenticated(false);
-        localStorage.removeItem('user');
-        document.cookie = 'user_role=; path=/; max-age=0';
+        localStorage.removeItem("user");
+        document.cookie = "user_role=; path=/; max-age=0";
 
-        const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+        const status = axios.isAxiosError(err)
+          ? err.response?.status
+          : undefined;
         const hasResponse = axios.isAxiosError(err) && !!err.response;
         if (hasResponse && (status === 401 || status === 403)) {
           void authAPI.logout().catch(() => {});
         } else if (!hasResponse) {
           try {
-            sessionStorage.setItem('auth_retry_probe', '1');
+            sessionStorage.setItem("auth_retry_probe", "1");
           } catch {
             /* ignore */
           }
@@ -142,8 +158,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
     const onOnline = () => {
       try {
-        if (sessionStorage.getItem('auth_retry_probe') !== '1') return;
-        sessionStorage.removeItem('auth_retry_probe');
+        if (sessionStorage.getItem("auth_retry_probe") !== "1") return;
+        sessionStorage.removeItem("auth_retry_probe");
       } catch {
         return;
       }
@@ -162,7 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // BUG-01 fix: Only attempt profile validation if we have a stored user hint.
     // Anonymous/public-page visitors (homepage, /login, /forgot-password, etc.)
     // skip the API call entirely.
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       setIsLoading(false);
       return;
@@ -173,25 +189,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       JSON.parse(storedUser);
     } catch {
-      localStorage.removeItem('user');
+      localStorage.removeItem("user");
       setIsLoading(false);
       return;
     }
 
-    fetchProfileDeduped()
-      .finally(() => setIsLoading(false));
+    fetchProfileDeduped().finally(() => setIsLoading(false));
   }, [mounted, fetchProfileDeduped]);
 
   /** Call after login/register — user object from server response */
   const login = useCallback((newUser: User) => {
     try {
-      sessionStorage.removeItem('auth_retry_probe');
+      sessionStorage.removeItem("auth_retry_probe");
     } catch {
       /* ignore */
     }
     setUser(newUser);
     setIsAuthenticated(true);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    localStorage.setItem("user", JSON.stringify(newUser));
     // Set a lightweight role cookie so the Edge proxy can do role-based redirects
     // without needing to decode the JWT (which is httpOnly and inaccessible at edge).
     document.cookie = `user_role=${newUser.role}; path=/; samesite=lax`;
@@ -212,34 +227,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(false);
     setAvatarMediaVersion(0);
     setCoverMediaVersion(0);
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
     sessionStorage.clear();
-    document.cookie = 'user_role=; path=/; max-age=0';
+    document.cookie = "user_role=; path=/; max-age=0";
     // Hard navigation so the whole app tree unmounts and no stale state remains (fixes empty dashboard on next login).
-    window.location.href = isStandalonePwaRuntime() ? '/pwa/onboarding' : '/';
+    window.location.href = isStandalonePwaRuntime() ? "/pwa/onboarding" : "/";
   }, []);
 
-  const hasRole = useCallback((...roles: Role[]) => {
-    return !!user && roles.includes(user.role);
-  }, [user]);
+  const hasRole = useCallback(
+    (...roles: Role[]) => {
+      return !!user && roles.includes(user.role);
+    },
+    [user],
+  );
 
   const refreshUser = useCallback(async (): Promise<User | null> => {
     return fetchProfileDeduped();
   }, [fetchProfileDeduped]);
 
   return (
-    <AuthContext.Provider value={{
-      user, login, refreshUser, logout,
-      isLoading, loading: isLoading,
-      isAuthenticated,
-      hasRole,
-      avatarMediaVersion,
-      coverMediaVersion,
-      bumpAvatarMediaVersion,
-      bumpCoverMediaVersion,
-      profileMediaVersion: avatarMediaVersion,
-      bumpProfileMediaVersion,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        refreshUser,
+        logout,
+        isLoading,
+        loading: isLoading,
+        isAuthenticated,
+        hasRole,
+        avatarMediaVersion,
+        coverMediaVersion,
+        bumpAvatarMediaVersion,
+        bumpCoverMediaVersion,
+        profileMediaVersion: avatarMediaVersion,
+        bumpProfileMediaVersion,
+      }}>
       {children}
     </AuthContext.Provider>
   );
@@ -247,6 +270,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 }

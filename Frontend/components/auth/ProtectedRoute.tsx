@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth, Role, dashboardPathForRole } from '../../context/AuthContext';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth, Role, dashboardPathForRole } from "../../context/AuthContext";
 
 interface ProtectedRouteProps {
-    children: React.ReactNode;
-    allowedRoles?: Role[];
+  children: React.ReactNode;
+  allowedRoles?: Role[];
 }
 
 /**
@@ -15,34 +15,37 @@ interface ProtectedRouteProps {
  * - Wrong role → redirect to correct dashboard
  * - Loading → show spinner
  */
-export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-    const { user, isLoading, isAuthenticated } = useAuth();
-    const router = useRouter();
+export default function ProtectedRoute({
+  children,
+  allowedRoles,
+}: ProtectedRouteProps) {
+  const { user, isLoading, isAuthenticated } = useAuth();
+  const router = useRouter();
 
-    useEffect(() => {
-        if (isLoading) return;
+  useEffect(() => {
+    if (isLoading) return;
 
-        if (!isAuthenticated || !user) {
-            router.replace('/login');
-            return;
-        }
-
-        if (allowedRoles && !allowedRoles.includes(user.role)) {
-            router.replace(dashboardPathForRole(user.role));
-        }
-    }, [isLoading, isAuthenticated, user, allowedRoles, router]);
-
-    if (isLoading) {
-        return (
-            <div className="flex h-screen items-center justify-center bg-app">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
-            </div>
-        );
+    if (!isAuthenticated || !user) {
+      router.replace("/login");
+      return;
     }
 
-    if (!isAuthenticated || !user) return null;
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
+      router.replace(dashboardPathForRole(user.role));
+    }
+  }, [isLoading, isAuthenticated, user, allowedRoles, router]);
 
-    if (allowedRoles && !allowedRoles.includes(user.role)) return null;
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-app">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
+      </div>
+    );
+  }
 
-    return <>{children}</>;
+  if (!isAuthenticated || !user) return null;
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) return null;
+
+  return <>{children}</>;
 }

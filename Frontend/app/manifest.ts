@@ -7,8 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "GymSphere",
     short_name: "GymSphere",
     id: "/pwa",
-    description:
-      `Gym management suite — facilities, trainers, workouts, and member tools. (v${APP_VERSION})`,
+    description: `Gym management suite — facilities, trainers, workouts, and member tools. (v${APP_VERSION})`,
     start_url: "/pwa",
     scope: "/",
     display_override: ["standalone", "minimal-ui"],

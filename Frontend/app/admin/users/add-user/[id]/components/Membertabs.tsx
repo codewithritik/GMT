@@ -36,15 +36,12 @@ export default function MemberTabs({ activeTab, onChange }: MemberTabsProps) {
               onClick={() => onChange(label)}
               className={cn(
                 "relative flex items-center gap-2 px-4 py-3.5 text-sm font-medium transition-colors whitespace-nowrap",
-                isActive
-                  ? "text-white"
-                  : "text-gray-500 hover:text-gray-300"
-              )}
-            >
+                isActive ? "text-white" : "text-gray-500 hover:text-gray-300",
+              )}>
               <Icon
                 className={cn(
                   "h-4 w-4",
-                  isActive ? "text-red-500" : "text-gray-500"
+                  isActive ? "text-red-500" : "text-gray-500",
                 )}
               />
               {label}

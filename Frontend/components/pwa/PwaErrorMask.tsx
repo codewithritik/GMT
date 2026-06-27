@@ -25,8 +25,7 @@ export function PwaErrorMask() {
           router.refresh();
           window.setTimeout(() => window.location.reload(), 1500);
         }}
-        className="mt-2 rounded-full bg-gradient-to-r from-red-700 to-red-900 px-8 py-3 font-bold text-white hover:from-red-600 hover:to-red-800 transition-colors flex items-center justify-center gap-2 mx-auto"
-      >
+        className="mt-2 rounded-full bg-gradient-to-r from-red-700 to-red-900 px-8 py-3 font-bold text-white hover:from-red-600 hover:to-red-800 transition-colors flex items-center justify-center gap-2 mx-auto">
         <RefreshCw size={16} />
         Retry
       </button>

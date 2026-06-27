@@ -24,7 +24,9 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     [mobileSidebarOpen],
   );
 
-  return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
+  return (
+    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
+  );
 }
 
 export function useSidebar() {

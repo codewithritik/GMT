@@ -1,30 +1,34 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Bot, MessageCircle, Send, X } from 'lucide-react';
-import { aiAPI, getErrorMessage } from '@/lib/api';
-import { useAuth } from '@/context/AuthContext';
-import { ChatMarkdown } from '@/components/ai/ChatMarkdown';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Bot, MessageCircle, Send, X } from "lucide-react";
+import { aiAPI, getErrorMessage } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
+import { ChatMarkdown } from "@/components/ai/ChatMarkdown";
 
 interface Msg {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   text: string;
 }
 
-type ChatbotRole = 'member' | 'manager';
+type ChatbotRole = "member" | "manager";
 
 interface MemberChatbotProps {
   role?: ChatbotRole;
 }
 
-type PrefillEventDetail = { message?: string; role?: ChatbotRole; resetSession?: boolean };
+type PrefillEventDetail = {
+  message?: string;
+  role?: ChatbotRole;
+  resetSession?: boolean;
+};
 
-export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
+export function MemberChatbot({ role = "member" }: MemberChatbotProps) {
   const { user } = useAuth();
   /** Bumps when we must ignore stale chatHistory responses (e.g. new thread from Generate plan). */
   const historyEpochRef = useRef(0);
   const [open, setOpen] = useState(false);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -32,24 +36,26 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
   const [historyReady, setHistoryReady] = useState(false);
 
   const greeting = useMemo(
-    () => role === 'manager'
-      ? 'Hi! I can help with revenue trends, attendance insights, staffing cues, and operational recommendations for GymSphere.'
-      : 'Hi! I can help with workouts, plans, appointments, and gym usage at GymSphere.',
+    () =>
+      role === "manager"
+        ? "Hi! I can help with revenue trends, attendance insights, staffing cues, and operational recommendations for GymSphere."
+        : "Hi! I can help with workouts, plans, appointments, and gym usage at GymSphere.",
     [role],
   );
 
   const quickPrompts = useMemo(
-    () => role === 'manager'
-      ? [
-        'Summarize this week’s key risks and actions',
-        'What should we do to improve retention this month?',
-        'Forecast next month revenue trend from current signals',
-      ]
-      : [
-        'Build a beginner muscle gain plan for me',
-        'Explain my current workout plan in simple steps',
-        'How do I improve consistency this week?',
-      ],
+    () =>
+      role === "manager"
+        ? [
+            "Summarize this week’s key risks and actions",
+            "What should we do to improve retention this month?",
+            "Forecast next month revenue trend from current signals",
+          ]
+        : [
+            "Build a beginner muscle gain plan for me",
+            "Explain my current workout plan in simple steps",
+            "How do I improve consistency this week?",
+          ],
     [role],
   );
 
@@ -57,7 +63,7 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
     if (!user?.id) {
       historyEpochRef.current += 1;
       setSessionId(null);
-      setMessages([{ role: 'assistant', text: greeting }]);
+      setMessages([{ role: "assistant", text: greeting }]);
       setHistoryReady(true);
       return;
     }
@@ -74,16 +80,17 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
         if (h.messages.length > 0) {
           setMessages(h.messages.map((m) => ({ role: m.role, text: m.text })));
         } else {
-          setMessages([{ role: 'assistant', text: greeting }]);
+          setMessages([{ role: "assistant", text: greeting }]);
         }
       })
       .catch(() => {
         if (cancelled || fetchEpoch !== historyEpochRef.current) return;
         setSessionId(null);
-        setMessages([{ role: 'assistant', text: greeting }]);
+        setMessages([{ role: "assistant", text: greeting }]);
       })
       .finally(() => {
-        if (!cancelled && fetchEpoch === historyEpochRef.current) setHistoryReady(true);
+        if (!cancelled && fetchEpoch === historyEpochRef.current)
+          setHistoryReady(true);
       });
 
     return () => {
@@ -95,21 +102,36 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
     async (overrideText?: string, explicitSession?: string | null) => {
       const text = (overrideText ?? input).trim();
       if (!text || loading) return;
-      setInput('');
-      setMessages((m) => [...m, { role: 'user', text }]);
+      setInput("");
+      setMessages((m) => [...m, { role: "user", text }]);
       setLoading(true);
-      const apiSessionId = explicitSession === null ? undefined : explicitSession ?? sessionId ?? undefined;
+      const apiSessionId =
+        explicitSession === null
+          ? undefined
+          : (explicitSession ?? sessionId ?? undefined);
       try {
         const res = await aiAPI.chat(text, apiSessionId);
-        const answer = (res?.answer ?? '').trim() || 'I could not generate a response. Please try rephrasing your question.';
-        if (res?.sessionId && res.sessionId !== sessionId) setSessionId(res.sessionId);
-        setMessages((m) => [...m, { role: 'assistant', text: answer }]);
+        const answer =
+          (res?.answer ?? "").trim() ||
+          "I could not generate a response. Please try rephrasing your question.";
+        if (res?.sessionId && res.sessionId !== sessionId)
+          setSessionId(res.sessionId);
+        setMessages((m) => [...m, { role: "assistant", text: answer }]);
         const a = answer.toLowerCase();
-        if (a.includes('my programmes') && (a.includes('saved') || a.includes('all set'))) {
-          window.dispatchEvent(new CustomEvent('pw:workout-plans-refresh'));
+        if (
+          a.includes("my programmes") &&
+          (a.includes("saved") || a.includes("all set"))
+        ) {
+          window.dispatchEvent(new CustomEvent("pw:workout-plans-refresh"));
         }
       } catch (err) {
-        setMessages((m) => [...m, { role: 'assistant', text: `I could not answer right now: ${getErrorMessage(err)}` }]);
+        setMessages((m) => [
+          ...m,
+          {
+            role: "assistant",
+            text: `I could not answer right now: ${getErrorMessage(err)}`,
+          },
+        ]);
       } finally {
         setLoading(false);
       }
@@ -121,12 +143,12 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
     const onPrefill = (evt: Event) => {
       const custom = evt as CustomEvent<PrefillEventDetail>;
       if (custom.detail?.role && custom.detail.role !== role) return;
-      const msg = (custom.detail?.message ?? '').trim();
+      const msg = (custom.detail?.message ?? "").trim();
       if (!msg) return;
       if (custom.detail?.resetSession) {
         historyEpochRef.current += 1;
         setSessionId(null);
-        setMessages([{ role: 'assistant', text: greeting }]);
+        setMessages([{ role: "assistant", text: greeting }]);
       }
       setOpen(true);
       setInput(msg);
@@ -136,8 +158,12 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
       const sess = custom.detail?.resetSession ? null : undefined;
       setTimeout(() => void send(msg, sess), 100);
     };
-    window.addEventListener('pw:ai-chat-prefill', onPrefill as EventListener);
-    return () => window.removeEventListener('pw:ai-chat-prefill', onPrefill as EventListener);
+    window.addEventListener("pw:ai-chat-prefill", onPrefill as EventListener);
+    return () =>
+      window.removeEventListener(
+        "pw:ai-chat-prefill",
+        onPrefill as EventListener,
+      );
   }, [role, greeting, send]);
 
   useEffect(() => {
@@ -155,21 +181,23 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
   return (
     <div
       className="fixed bottom-6 right-6 z-[120] pointer-events-none max-md:bottom-[calc(6rem+env(safe-area-inset-bottom,0px))]"
-      aria-hidden={!open}
-    >
+      aria-hidden={!open}>
       {open && (
         <div
           className="pointer-events-auto absolute bottom-20 right-0 rounded-3xl border border-zinc-700/80 bg-zinc-900/95 backdrop-blur-2xl shadow-[0_18px_45px_rgba(0,0,0,0.75)] flex flex-col overflow-hidden w-[min(92vw,380px)] h-[min(75vh,520px)] max-h-[calc(100vh-10rem-env(safe-area-inset-bottom,0px))]"
           role="dialog"
-          aria-label={role === 'manager' ? 'AI assistant' : 'AI assistant'}
-        >
+          aria-label={role === "manager" ? "AI assistant" : "AI assistant"}>
           <div className="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-red-600">
                 <Bot size={18} className="text-white" />
               </span>
               <div>
-                <p className="text-white text-sm font-semibold">{role === 'manager' ? 'Manager Assistant' : 'Member Assistant'}</p>
+                <p className="text-white text-sm font-semibold">
+                  {role === "manager"
+                    ? "Manager Assistant"
+                    : "Member Assistant"}
+                </p>
                 <p className="text-[11px] text-zinc-500">GymSphere · AI</p>
               </div>
             </div>
@@ -181,21 +209,32 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
             className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0"
             onMouseDown={(e) => {
               if (e.target === e.currentTarget) focusInput();
-            }}
-          >
+            }}>
             {!historyReady && (
-              <div className="text-xs text-zinc-500">Loading your conversation…</div>
-            )}
-            {historyReady && messages.map((m, i) => (
-              <div key={i} className={`text-sm px-3 py-2.5 rounded-2xl max-w-[82%] leading-relaxed ${
-                m.role === 'assistant'
-                  ? 'bg-zinc-800 text-zinc-100 border border-zinc-700/70 shadow-sm'
-                  : 'bg-red-600/25 text-zinc-50 ml-auto shadow-sm'
-              }`}>
-                <ChatMarkdown text={m.text} variant={m.role === 'user' ? 'user' : 'assistant'} />
+              <div className="text-xs text-zinc-500">
+                Loading your conversation…
               </div>
-            ))}
-            {historyReady && loading && <div className="text-xs text-zinc-500">Assistant is typing...</div>}
+            )}
+            {historyReady &&
+              messages.map((m, i) => (
+                <div
+                  key={i}
+                  className={`text-sm px-3 py-2.5 rounded-2xl max-w-[82%] leading-relaxed ${
+                    m.role === "assistant"
+                      ? "bg-zinc-800 text-zinc-100 border border-zinc-700/70 shadow-sm"
+                      : "bg-red-600/25 text-zinc-50 ml-auto shadow-sm"
+                  }`}>
+                  <ChatMarkdown
+                    text={m.text}
+                    variant={m.role === "user" ? "user" : "assistant"}
+                  />
+                </div>
+              ))}
+            {historyReady && loading && (
+              <div className="text-xs text-zinc-500">
+                Assistant is typing...
+              </div>
+            )}
             {historyReady && !loading && (
               <div className="pt-1 flex flex-wrap gap-2">
                 {quickPrompts.map((q) => (
@@ -203,8 +242,7 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
                     key={q}
                     type="button"
                     onClick={() => send(q)}
-                    className="text-[11px] px-2.5 py-1 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300"
-                  >
+                    className="text-[11px] px-2.5 py-1 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300">
                     {q}
                   </button>
                 ))}
@@ -219,9 +257,15 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
                 autoComplete="off"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') send(); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") send();
+                }}
                 disabled={!historyReady || loading}
-                placeholder={role === 'manager' ? 'Ask about branch ops, revenue, staffing…' : 'Ask about your training, plan, or schedule…'}
+                placeholder={
+                  role === "manager"
+                    ? "Ask about branch ops, revenue, staffing…"
+                    : "Ask about your training, plan, or schedule…"
+                }
                 className="flex-1 min-w-0 bg-zinc-900 text-white border border-zinc-700 rounded-2xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/70 disabled:opacity-50"
               />
               <button
@@ -229,8 +273,7 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
                 onClick={() => send()}
                 disabled={!historyReady || loading}
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-600 hover:bg-red-700 text-white disabled:opacity-60 shadow-md"
-                aria-label="Send message"
-              >
+                aria-label="Send message">
                 <Send size={15} />
               </button>
             </div>
@@ -241,8 +284,7 @@ export function MemberChatbot({ role = 'member' }: MemberChatbotProps) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="pointer-events-auto w-14 h-14 rounded-full bg-zinc-800/95 hover:bg-zinc-700 text-white shadow-[0_12px_30px_rgba(0,0,0,0.7)] flex items-center justify-center transition-colors duration-150 border border-zinc-700/70"
-        aria-label={open ? 'Close AI assistant' : 'Open AI assistant'}
-      >
+        aria-label={open ? "Close AI assistant" : "Open AI assistant"}>
         {open ? <X size={20} /> : <MessageCircle size={20} />}
       </button>
     </div>

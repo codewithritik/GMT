@@ -162,7 +162,6 @@ CREATE TABLE IF NOT EXISTS `members` (
   `emergency_phone`         VARCHAR(20)  DEFAULT NULL,
   `emergency_relation`      VARCHAR(50)  DEFAULT NULL,
 
-  `fitness_goals`           VARCHAR(500) DEFAULT NULL,
   `is_onboarded`            TINYINT(1)   NOT NULL DEFAULT 0,
   `onboarded_at`            TIMESTAMP    NULL DEFAULT NULL,
   `subscription_plan_id`    VARCHAR(36)  DEFAULT NULL,
@@ -180,7 +179,7 @@ CREATE TABLE IF NOT EXISTS `members` (
   `assigned_trainer`        VARCHAR(36)  DEFAULT NULL,
   `workout_time`            VARCHAR(100) DEFAULT NULL,
   `notes`                   TEXT         DEFAULT NULL,
-  
+
   PRIMARY KEY (`user_id`),
 
   UNIQUE KEY `uq_member_lifecycle` (`lifecycle_id`),
@@ -241,30 +240,69 @@ CREATE TABLE IF NOT EXISTS `trainers` (
 -- ============================================================================
 -- 6. MEMBER_METRICS
 -- ============================================================================
+CREATE TABLE IF NOT EXISTS member_metrics (
+    id              VARCHAR(36) NOT NULL,
+    lifecycle_id    VARCHAR(36) NOT NULL,
+    person_id       VARCHAR(36) NOT NULL,
 
-CREATE TABLE IF NOT EXISTS `member_metrics` (
-  `id`            VARCHAR(36)   NOT NULL,
-  `lifecycle_id`  VARCHAR(36)   NOT NULL,
-  `person_id`     VARCHAR(36)   NOT NULL,
-  `recorded_at`   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `source`        ENUM('manual','trainer','device') NOT NULL DEFAULT 'manual',
-  `weight_kg`     DECIMAL(5,2)  DEFAULT NULL,
-  `height_cm`     DECIMAL(5,2)  DEFAULT NULL,
-  `bmi`           DECIMAL(4,1)  DEFAULT NULL,
-  `resting_hr`    TINYINT       DEFAULT NULL,
-  `notes`         TEXT          DEFAULT NULL,
+    recorded_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_metrics_lifecycle` (`lifecycle_id`),
-  INDEX `idx_metrics_person` (`person_id`),
-  INDEX `idx_metrics_date`   (`recorded_at`),
-  CONSTRAINT `fk_metrics_lifecycle` FOREIGN KEY (`lifecycle_id`) REFERENCES `entity_lifecycle`(`id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_metrics_person`   FOREIGN KEY (`person_id`)  REFERENCES `users`(`id`) ON DELETE RESTRICT,
-  CONSTRAINT `chk_weight`    CHECK (`weight_kg`   IS NULL OR `weight_kg`   BETWEEN 1   AND 500),
-  CONSTRAINT `chk_height`    CHECK (`height_cm`   IS NULL OR `height_cm`   BETWEEN 50  AND 250),
-  CONSTRAINT `chk_bmi`       CHECK (`bmi`          IS NULL OR `bmi`          BETWEEN 5  AND 80)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    source          ENUM('manual','trainer','device')
+                    NOT NULL DEFAULT 'manual',
 
+    -- Body Metrics
+    weight_kg       DECIMAL(5,2) DEFAULT NULL,
+    height_cm       DECIMAL(5,2) DEFAULT NULL,
+    bmi             DECIMAL(4,1) DEFAULT NULL,
+
+    body_fat_pct    DECIMAL(5,2) DEFAULT NULL,
+    muscle_mass_kg  DECIMAL(5,2) DEFAULT NULL,
+
+    -- Vitals
+    resting_hr      TINYINT DEFAULT NULL,
+
+    -- Goals
+    target_weight_kg DECIMAL(5,2) DEFAULT NULL,
+
+    notes           TEXT DEFAULT NULL,
+
+    PRIMARY KEY (id),
+
+    INDEX idx_metrics_person (person_id),
+    INDEX idx_metrics_lifecycle (lifecycle_id),
+    INDEX idx_metrics_recorded_at (recorded_at),
+
+    CONSTRAINT fk_metrics_lifecycle
+        FOREIGN KEY (lifecycle_id)
+        REFERENCES entity_lifecycle(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_metrics_person
+        FOREIGN KEY (person_id)
+        REFERENCES users(id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT chk_weight
+        CHECK (weight_kg IS NULL OR weight_kg BETWEEN 1 AND 500),
+
+    CONSTRAINT chk_height
+        CHECK (height_cm IS NULL OR height_cm BETWEEN 50 AND 250),
+
+    CONSTRAINT chk_bmi
+        CHECK (bmi IS NULL OR bmi BETWEEN 5 AND 80),
+
+    CONSTRAINT chk_body_fat
+        CHECK (body_fat_pct IS NULL OR body_fat_pct BETWEEN 1 AND 80),
+
+    CONSTRAINT chk_muscle_mass
+        CHECK (muscle_mass_kg IS NULL OR muscle_mass_kg BETWEEN 1 AND 300),
+
+    CONSTRAINT chk_target_weight
+        CHECK (target_weight_kg IS NULL OR target_weight_kg BETWEEN 1 AND 500)
+
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
 -- ============================================================================
 -- 7. VISITS
 -- ============================================================================

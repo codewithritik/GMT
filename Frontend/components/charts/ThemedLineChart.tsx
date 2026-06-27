@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 
 type Series = {
   name: string;
@@ -15,8 +15,13 @@ type Props = {
   className?: string;
 };
 
-function toPoints(values: number[], width: number, height: number, max: number) {
-  if (values.length <= 1) return '';
+function toPoints(
+  values: number[],
+  width: number,
+  height: number,
+  max: number,
+) {
+  if (values.length <= 1) return "";
   const stepX = width / (values.length - 1);
   return values
     .map((v, i) => {
@@ -24,10 +29,15 @@ function toPoints(values: number[], width: number, height: number, max: number) 
       const y = height - (max > 0 ? (v / max) * height : 0);
       return `${x},${y}`;
     })
-    .join(' ');
+    .join(" ");
 }
 
-export function ThemedLineChart({ labels, series, height = 220, className }: Props) {
+export function ThemedLineChart({
+  labels,
+  series,
+  height = 220,
+  className,
+}: Props) {
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [drawReady, setDrawReady] = useState(false);
   useEffect(() => {
@@ -41,10 +51,15 @@ export function ThemedLineChart({ labels, series, height = 220, className }: Pro
   const xCount = labels.length;
   const xStep = xCount > 1 ? w / (xCount - 1) : w;
   const activeSummary = useMemo(() => {
-    if (activeIdx == null || activeIdx < 0 || activeIdx >= labels.length) return null;
+    if (activeIdx == null || activeIdx < 0 || activeIdx >= labels.length)
+      return null;
     return {
       label: labels[activeIdx],
-      items: series.map((s) => ({ name: s.name, color: s.color, value: Number(s.values[activeIdx] ?? 0) })),
+      items: series.map((s) => ({
+        name: s.name,
+        color: s.color,
+        value: Number(s.values[activeIdx] ?? 0),
+      })),
     };
   }, [activeIdx, labels, series]);
 
@@ -53,11 +68,16 @@ export function ThemedLineChart({ labels, series, height = 220, className }: Pro
       <div className="relative rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
         {activeSummary && (
           <div className="absolute right-4 top-4 z-10 rounded-lg border border-zinc-700/80 bg-zinc-900/90 px-3 py-2 text-xs text-zinc-200 shadow-lg">
-            <p className="text-[11px] font-semibold text-white mb-1">{activeSummary.label}</p>
+            <p className="text-[11px] font-semibold text-white mb-1">
+              {activeSummary.label}
+            </p>
             <div className="space-y-1">
               {activeSummary.items.map((it) => (
                 <p key={it.name} className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: it.color }} />
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: it.color }}
+                  />
                   <span className="text-zinc-300">{it.name}:</span>
                   <span className="font-semibold text-white">{it.value}</span>
                 </p>
@@ -73,7 +93,15 @@ export function ThemedLineChart({ labels, series, height = 220, className }: Pro
             </linearGradient>
           </defs>
           {[0.25, 0.5, 0.75, 1].map((m) => (
-            <line key={m} x1="0" y1={h * m} x2={w} y2={h * m} stroke="url(#pwGrid)" strokeWidth="1" />
+            <line
+              key={m}
+              x1="0"
+              y1={h * m}
+              x2={w}
+              y2={h * m}
+              stroke="url(#pwGrid)"
+              strokeWidth="1"
+            />
           ))}
           {series.map((s) => (
             <polyline
@@ -88,7 +116,7 @@ export function ThemedLineChart({ labels, series, height = 220, className }: Pro
               style={{
                 strokeDasharray: 1,
                 strokeDashoffset: drawReady ? 0 : 1,
-                transition: 'stroke-dashoffset 850ms ease-out',
+                transition: "stroke-dashoffset 850ms ease-out",
               }}
             />
           ))}
@@ -128,15 +156,24 @@ export function ThemedLineChart({ labels, series, height = 220, className }: Pro
         <div className="mt-3 flex items-center gap-4 text-xs text-zinc-400">
           {series.map((s) => (
             <span key={s.name} className="inline-flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+              <span
+                className="h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: s.color }}
+              />
               {s.name}
             </span>
           ))}
         </div>
       </div>
-      <div className="mt-2 grid" style={{ gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))` }}>
+      <div
+        className="mt-2 grid"
+        style={{
+          gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))`,
+        }}>
         {labels.map((label, i) => (
-          <span key={`${label}-${i}`} className="text-[10px] text-zinc-500 text-center">
+          <span
+            key={`${label}-${i}`}
+            className="text-[10px] text-zinc-500 text-center">
             {label}
           </span>
         ))}
@@ -144,4 +181,3 @@ export function ThemedLineChart({ labels, series, height = 220, className }: Pro
     </div>
   );
 }
-

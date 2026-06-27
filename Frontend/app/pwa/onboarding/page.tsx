@@ -26,14 +26,62 @@ function OnboardingArt({ step }: { step: number }) {
     // Digitalisation: paper → screen
     return (
       <svg {...common} aria-hidden>
-        <rect x="62" y="54" width="128" height="152" rx="18" stroke={muted} strokeWidth="2" />
-        <path d="M94 92h64M94 120h74M94 148h56" stroke={muted} strokeWidth="3" strokeLinecap="round" />
-        <path d="M198 132c28 0 44-8 62-24 18-16 40-24 72-24" stroke={accent} strokeWidth="4" strokeLinecap="round" />
-        <rect x="236" y="70" width="144" height="164" rx="24" stroke={stroke} strokeWidth="2.5" />
-        <rect x="258" y="96" width="48" height="36" rx="10" fill="rgba(239,68,68,0.14)" stroke="rgba(239,68,68,0.55)" />
+        <rect
+          x="62"
+          y="54"
+          width="128"
+          height="152"
+          rx="18"
+          stroke={muted}
+          strokeWidth="2"
+        />
+        <path
+          d="M94 92h64M94 120h74M94 148h56"
+          stroke={muted}
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <path
+          d="M198 132c28 0 44-8 62-24 18-16 40-24 72-24"
+          stroke={accent}
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <rect
+          x="236"
+          y="70"
+          width="144"
+          height="164"
+          rx="24"
+          stroke={stroke}
+          strokeWidth="2.5"
+        />
+        <rect
+          x="258"
+          y="96"
+          width="48"
+          height="36"
+          rx="10"
+          fill="rgba(239,68,68,0.14)"
+          stroke="rgba(239,68,68,0.55)"
+        />
         <rect x="316" y="96" width="44" height="36" rx="10" stroke={muted} />
-        <rect x="258" y="144" width="102" height="10" rx="5" fill="rgba(244,244,245,0.12)" />
-        <rect x="258" y="166" width="84" height="10" rx="5" fill="rgba(244,244,245,0.10)" />
+        <rect
+          x="258"
+          y="144"
+          width="102"
+          height="10"
+          rx="5"
+          fill="rgba(244,244,245,0.12)"
+        />
+        <rect
+          x="258"
+          y="166"
+          width="84"
+          height="10"
+          rx="5"
+          fill="rgba(244,244,245,0.10)"
+        />
         <circle cx="236" cy="70" r="3" fill={accent} />
       </svg>
     );
@@ -43,14 +91,47 @@ function OnboardingArt({ step }: { step: number }) {
     // Convenience: tap + shortcuts
     return (
       <svg {...common} aria-hidden>
-        <rect x="86" y="46" width="248" height="156" rx="24" stroke={stroke} strokeWidth="2.5" />
+        <rect
+          x="86"
+          y="46"
+          width="248"
+          height="156"
+          rx="24"
+          stroke={stroke}
+          strokeWidth="2.5"
+        />
         <rect x="110" y="72" width="200" height="74" rx="14" stroke={muted} />
         <rect x="110" y="158" width="60" height="28" rx="10" stroke={muted} />
-        <rect x="180" y="158" width="60" height="28" rx="10" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.55)" />
+        <rect
+          x="180"
+          y="158"
+          width="60"
+          height="28"
+          rx="10"
+          fill="rgba(239,68,68,0.12)"
+          stroke="rgba(239,68,68,0.55)"
+        />
         <rect x="250" y="158" width="60" height="28" rx="10" stroke={muted} />
-        <circle cx="210" cy="109" r="20" fill="rgba(239,68,68,0.14)" stroke="rgba(239,68,68,0.6)" />
-        <path d="M210 97v24M198 109h24" stroke="rgba(239,68,68,0.75)" strokeWidth="3.5" strokeLinecap="round" />
-        <path d="M58 206h304" stroke={muted} strokeWidth="3" strokeLinecap="round" opacity="0.45" />
+        <circle
+          cx="210"
+          cy="109"
+          r="20"
+          fill="rgba(239,68,68,0.14)"
+          stroke="rgba(239,68,68,0.6)"
+        />
+        <path
+          d="M210 97v24M198 109h24"
+          stroke="rgba(239,68,68,0.75)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+        />
+        <path
+          d="M58 206h304"
+          stroke={muted}
+          strokeWidth="3"
+          strokeLinecap="round"
+          opacity="0.45"
+        />
       </svg>
     );
   }
@@ -59,21 +140,57 @@ function OnboardingArt({ step }: { step: number }) {
     // Every role: 2x2 role cards + hub
     return (
       <svg {...common} aria-hidden>
-        <circle cx="210" cy="124" r="12" fill="rgba(239,68,68,0.18)" stroke="rgba(239,68,68,0.7)" />
-        <path d="M210 112v-26M210 136v26M198 124h-26M222 124h26" stroke="rgba(239,68,68,0.65)" strokeWidth="3" strokeLinecap="round" />
+        <circle
+          cx="210"
+          cy="124"
+          r="12"
+          fill="rgba(239,68,68,0.18)"
+          stroke="rgba(239,68,68,0.7)"
+        />
+        <path
+          d="M210 112v-26M210 136v26M198 124h-26M222 124h26"
+          stroke="rgba(239,68,68,0.65)"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
 
         <rect x="54" y="38" width="140" height="72" rx="18" stroke={muted} />
         <rect x="226" y="38" width="140" height="72" rx="18" stroke={muted} />
         <rect x="54" y="146" width="140" height="72" rx="18" stroke={muted} />
         <rect x="226" y="146" width="140" height="72" rx="18" stroke={muted} />
 
-        <path d="M194 74h12M226 74h-12M124 110v12M124 146v-12M296 110v12M296 146v-12" stroke={muted} strokeWidth="2.5" strokeLinecap="round" />
+        <path
+          d="M194 74h12M226 74h-12M124 110v12M124 146v-12M296 110v12M296 146v-12"
+          stroke={muted}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
 
         <circle cx="102" cy="72" r="11" stroke={muted} />
-        <path d="M90 90c8-9 16-9 24 0" stroke={muted} strokeWidth="2.5" strokeLinecap="round" />
-        <path d="M282 70h28M282 80h28" stroke={muted} strokeWidth="3" strokeLinecap="round" />
-        <path d="M98 180h52" stroke={muted} strokeWidth="3" strokeLinecap="round" />
-        <path d="M270 176h28M264 188h40" stroke={muted} strokeWidth="3" strokeLinecap="round" />
+        <path
+          d="M90 90c8-9 16-9 24 0"
+          stroke={muted}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+        <path
+          d="M282 70h28M282 80h28"
+          stroke={muted}
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <path
+          d="M98 180h52"
+          stroke={muted}
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <path
+          d="M270 176h28M264 188h40"
+          stroke={muted}
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
       </svg>
     );
   }
@@ -90,10 +207,24 @@ function OnboardingArt({ step }: { step: number }) {
       <circle cx="74" cy="192" r="6" fill={accent} />
       <circle cx="210" cy="130" r="6" fill="rgba(244,244,245,0.35)" />
       <circle cx="318" cy="120" r="6" fill="rgba(244,244,245,0.35)" />
-      <path d="M360 54v64" stroke={muted} strokeWidth="3" strokeLinecap="round" />
-      <path d="M360 58c18 6 28 0 44-6v28c-16 6-26 12-44 6" fill="rgba(239,68,68,0.16)" stroke="rgba(239,68,68,0.6)" />
+      <path
+        d="M360 54v64"
+        stroke={muted}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <path
+        d="M360 58c18 6 28 0 44-6v28c-16 6-26 12-44 6"
+        fill="rgba(239,68,68,0.16)"
+        stroke="rgba(239,68,68,0.6)"
+      />
 
-      <path d="M96 226h228" stroke={muted} strokeWidth="3" strokeLinecap="round" />
+      <path
+        d="M96 226h228"
+        stroke={muted}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
       {[0, 1, 2, 3].map((i) => (
         <circle
           key={i}
@@ -112,7 +243,9 @@ export default function PwaOnboardingPage() {
   const router = useRouter();
   const isStandalone = useIsStandalonePwa();
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [isOnline, setIsOnline] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine));
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator === "undefined" ? true : navigator.onLine,
+  );
 
   const [step, setStep] = useState(0);
 
@@ -130,10 +263,10 @@ export default function PwaOnboardingPage() {
       };
     }
     if (step === 2) {
-    return {
-      hero: "Built for every role",
-      sub: "Members, trainers, managers, admins—each gets a focused workspace and clear actions.",
-    };
+      return {
+        hero: "Built for every role",
+        sub: "Members, trainers, managers, admins—each gets a focused workspace and clear actions.",
+      };
     }
     return {
       hero: "Begin your journey",
@@ -204,11 +337,12 @@ export default function PwaOnboardingPage() {
           // Generous margins, but responsive so short screens still fit (no scrollbars).
           paddingTop: "max(env(safe-area-inset-top), clamp(20px, 5.5vh, 56px))",
           // Slightly smaller bottom margin pushes buttons down (visually closer to bottom).
-          paddingBottom: "max(env(safe-area-inset-bottom), clamp(6px, 1.8vh, 18px))",
+          paddingBottom:
+            "max(env(safe-area-inset-bottom), clamp(6px, 1.8vh, 18px))",
           paddingLeft: "max(env(safe-area-inset-left), clamp(18px, 5vw, 56px))",
-          paddingRight: "max(env(safe-area-inset-right), clamp(18px, 5vw, 56px))",
-        }}
-      >
+          paddingRight:
+            "max(env(safe-area-inset-right), clamp(18px, 5vw, 56px))",
+        }}>
         <div className="grid h-full grid-rows-[auto,1fr,auto]">
           {/* Header */}
           <div className="text-center">
@@ -239,8 +373,7 @@ export default function PwaOnboardingPage() {
             <div className="min-h-0 w-full flex items-center justify-center">
               <div
                 className="w-full flex items-center justify-center"
-                style={{ height: artMaxHeight }}
-              >
+                style={{ height: artMaxHeight }}>
                 <OnboardingArt step={step} />
               </div>
             </div>
@@ -248,26 +381,28 @@ export default function PwaOnboardingPage() {
 
           {/* Footer */}
           <div>
-          <div className="flex items-center justify-center gap-3">
-            {step > 0 && (
-              <LoadingButton variant="secondary" size="md" onClick={goBack}>
-                Back
-              </LoadingButton>
-            )}
-            {step < 3 ? (
-              <LoadingButton variant="primary" size="md" onClick={goNext}>
-                Next
-              </LoadingButton>
-            ) : (
-              <LoadingButton variant="primary" size="md" onClick={continueToSignIn}>
-                Start
-              </LoadingButton>
-            )}
-          </div>
+            <div className="flex items-center justify-center gap-3">
+              {step > 0 && (
+                <LoadingButton variant="secondary" size="md" onClick={goBack}>
+                  Back
+                </LoadingButton>
+              )}
+              {step < 3 ? (
+                <LoadingButton variant="primary" size="md" onClick={goNext}>
+                  Next
+                </LoadingButton>
+              ) : (
+                <LoadingButton
+                  variant="primary"
+                  size="md"
+                  onClick={continueToSignIn}>
+                  Start
+                </LoadingButton>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

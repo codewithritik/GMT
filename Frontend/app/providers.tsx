@@ -9,17 +9,18 @@ import { PwaErrorMask } from "@/components/pwa/PwaErrorMask";
 import { useIsStandalonePwa } from "@/lib/pwa/useIsStandalonePwa";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-    const isStandalone = useIsStandalonePwa();
-    return (
-        <ErrorBoundary fallback={isStandalone === true ? <PwaErrorMask /> : undefined}>
-            <AuthProvider>
-                <SidebarProvider>
-                    <ToastProvider>
-                        <GlobalLoadingOverlay />
-                        {children}
-                    </ToastProvider>
-                </SidebarProvider>
-            </AuthProvider>
-        </ErrorBoundary>
-    );
+  const isStandalone = useIsStandalonePwa();
+  return (
+    <ErrorBoundary
+      fallback={isStandalone === true ? <PwaErrorMask /> : undefined}>
+      <AuthProvider>
+        <SidebarProvider>
+          <ToastProvider>
+            <GlobalLoadingOverlay />
+            {children}
+          </ToastProvider>
+        </SidebarProvider>
+      </AuthProvider>
+    </ErrorBoundary>
+  );
 }

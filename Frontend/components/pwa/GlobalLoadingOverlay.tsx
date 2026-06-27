@@ -58,8 +58,7 @@ export function GlobalLoadingOverlay() {
         className={[
           "fixed inset-0 z-[200] flex items-center justify-center bg-app/60 backdrop-blur-sm transition-opacity duration-150 pointer-events-none",
           visible ? "opacity-100" : "opacity-0",
-        ].join(" ")}
-      >
+        ].join(" ")}>
         <div className="flex flex-col items-center gap-3">
           {showSplashArt ? (
             <img
@@ -83,10 +82,11 @@ export function GlobalLoadingOverlay() {
               ))}
             </div>
           )}
-          <div className="text-zinc-200 text-sm font-medium">Please wait...</div>
+          <div className="text-zinc-200 text-sm font-medium">
+            Please wait...
+          </div>
         </div>
       </div>
     </>
   );
 }
-

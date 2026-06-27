@@ -3374,7 +3374,10 @@ const MEMBER_METRICS_COLUMNS = new Set([
   'weightKg',
   'heightCm',
   'bmi',
+  'bodyFatPct',
+  'muscleMassKg',
   'restingHr',
+  'targetWeightKg',
   'notes',
   'source',
   'recordedAt',
@@ -3393,6 +3396,32 @@ function splitMemberMetricsPatch(raw: Record<string, any>) {
   }
 
   return { memberExtras, metrics };
+}
+
+export async function updateMemberSubscriptionPlan(memberId: string, subscriptionPlanId: string, actorId?: string) {
+  const [member] = await db.select().from(members).where(eq(members.userId, memberId)).limit(1);
+  if (!member) throw errors.notFound('Member');
+
+  const [plan] = await db
+    .select({ id: subscriptionPlans.id, name: subscriptionPlans.name })
+    .from(subscriptionPlans)
+    .where(eq(subscriptionPlans.id, subscriptionPlanId))
+    .limit(1);
+  if (!plan) throw errors.badRequest('Subscription plan not found');
+
+  await db.update(members).set({ subscriptionPlanId }).where(eq(members.userId, memberId));
+
+  await audit.appendAudit({
+    actorId: actorId ?? memberId,
+    action: 'member_subscription_plan_updated',
+    category: 'member',
+    entityType: 'member',
+    entityId: memberId,
+    detail: `Assigned plan changed to ${plan.name ?? subscriptionPlanId}`.slice(0, 500),
+  });
+
+  const [updated] = await db.select().from(members).where(eq(members.userId, memberId));
+  return updated!;
 }
 
 export async function updateMemberMetrics(
@@ -3445,12 +3474,13 @@ export async function updateMemberMetrics(
     if (Object.keys(metricsPatch).length > 0) {
       const metricsLifecycleId = await insertLifecycleRow(tx);
 
-      await tx.insert(memberMetrics).values({
+      const cr = await tx.insert(memberMetrics).values({
         id: crypto.randomUUID(),
         lifecycleId: metricsLifecycleId,
         personId: memberId,
         ...metricsPatch,
       });
+      // console.log("cr added metrics", cr);
 
       result.memberMetrics = true;
     }

@@ -647,3 +647,17 @@ export const updateMemberMetrics = asyncHandler(async (req: AuthRequest, res: Re
   if (!memberId) throw errors.badRequest('memberId is required');
   res.json(response.success(await opsService.updateMemberMetrics(memberId, req.body), 'Member metrics updated'));
 });
+
+export const updateMemberSubscriptionPlan = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const user = requireUser(req);
+  const memberId = String(req.params.id ?? '').trim();
+  const subscriptionPlanId = String(req.body?.subscriptionPlanId ?? '').trim();
+  if (!memberId) throw errors.badRequest('memberId is required');
+  if (!subscriptionPlanId) throw errors.badRequest('subscriptionPlanId is required');
+  res.json(
+    response.success(
+      await opsService.updateMemberSubscriptionPlan(memberId, subscriptionPlanId, user.id),
+      'Member subscription plan updated',
+    ),
+  );
+});

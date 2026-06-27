@@ -36,8 +36,7 @@ export default function GlobalError({
           <button
             type="button"
             onClick={() => reset()}
-            className="mt-2 rounded-full bg-gradient-to-r from-red-700 to-red-900 px-6 py-3 font-bold text-white hover:from-red-600 hover:to-red-800 transition-colors"
-          >
+            className="mt-2 rounded-full bg-gradient-to-r from-red-700 to-red-900 px-6 py-3 font-bold text-white hover:from-red-600 hover:to-red-800 transition-colors">
             Retry
           </button>
         </div>
@@ -45,4 +44,3 @@ export default function GlobalError({
     </html>
   );
 }
-
